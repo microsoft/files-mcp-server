@@ -1,11 +1,11 @@
-# OneDrive MCP Server
+# Files MCP Server
 
 This library provides an MCP server for local testing with any client that supports the [Model Context Protocol](https://modelcontextprotocol.io/introduction).
 
 ## Install
 
 1. Clone this repository locally (will update once we are published to NPM)
-2. In your MCP client of choice add this server using `npx -y {ABSOLUTE LOCAL PATH}\onedrive-mcp-server`
+2. In your MCP client of choice add this server using `npx -y {ABSOLUTE LOCAL PATH}\files-mcp-server`
 3. Edit the server configuration to include the require env vars
    ```json
    {
@@ -16,7 +16,7 @@ This library provides an MCP server for local testing with any client that suppo
                     "command": "npx",
                     "args": [
                         "-y",
-                        "D:\\github\\onedrive-mcp-server"
+                        "D:\\github\\files-mcp-server"
                     ],
                     "env": {
                         "ODMCP_TENANT_ID": "{TENANT_ID}",
@@ -49,15 +49,6 @@ export const inputSchema = {}; // ANY REQUIRED INPUT SCHEMA
 // UPDATE THE HANDLER LOGIC AS REQUIRED
 export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<CallToolResult> {
 
-    const token = await this.getToken();
-
-    const response = await fetch("https://graph.microsoft.com/v1.0/drives", {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-        }
-    });
-
-    return parseResposneToResult(response);    
+    return this.fetch("https://graph.microsoft.com/v1.0/drives");
 };
 ```
