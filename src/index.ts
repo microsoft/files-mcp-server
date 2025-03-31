@@ -2,6 +2,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
+    CallToolResult,
     CallToolRequest,
     CallToolRequestSchema,
     ListToolsRequestSchema,
@@ -9,7 +10,8 @@ import {
 
 import { getTools } from "./tools.js";
 import { getToken } from "./auth.js";
-import { formatResponse } from "./utils.js";
+import { formatResponse, parseResposneToResult } from "./utils.js";
+import { ToolContext } from "./types.js";
 
 async function main(): Promise<void> {
 
@@ -27,10 +29,22 @@ async function main(): Promise<void> {
     );
 
     // context passed to all tools
-    const context = {
-        async getToken(): Promise<string> {
-            return getToken();
-        }
+    const context: ToolContext = {
+        graphBaseUrl: "https://graph.microsoft.com",
+        graphVersionPart: "v1.0",
+        async fetch(path: string, method: "GET" = "GET", body?: any): Promise<CallToolResult> {
+
+            const token = await getToken(this);
+
+            const response = await fetch(path, {
+                method,
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                }
+            });
+
+            return parseResposneToResult(response);
+        },
     }
 
     // this allows us to list tools

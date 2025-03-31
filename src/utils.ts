@@ -39,3 +39,26 @@ export function encodeKey(key: string): string {
 export function decodeKey(key: string): string {
     return Buffer.from(key, 'base64').toString('ascii');
 }
+
+/**
+ * Combines an arbitrary set of paths ensuring and normalizes the slashes
+ *
+ * @param paths 0 to n path parts to combine
+ */
+export function combine(...paths: (string | null | undefined)[]): string {
+
+    return paths
+        .filter(path => !stringIsNullOrEmpty(path))
+        .map(path => path.replace(/^[\\|/]/, "").replace(/[\\|/]$/, ""))
+        .join("/")
+        .replace(/\\/g, "/");
+}
+
+/**
+ * Determines if a string is null or empty or undefined
+ *
+ * @param s The string to test
+ */
+export function stringIsNullOrEmpty(s: string | undefined | null): s is undefined | null | "" {
+    return typeof s === "undefined" || s === null || s.length < 1;
+}

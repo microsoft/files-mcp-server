@@ -1,7 +1,9 @@
-import { CallToolRequest, Tool } from "@modelcontextprotocol/sdk/types";
+import { CallToolRequest, CallToolResult, Tool } from "@modelcontextprotocol/sdk/types";
 
 export interface ToolContext {
-    getToken(): Promise<string>;
+    fetch(path: string, body?: any): Promise<CallToolResult>;
+    graphBaseUrl: string;
+    graphVersionPart: string;
 }
 
 export interface DynamicTool extends Tool {
