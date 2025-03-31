@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { ConfidentialClientApplication } from "@azure/msal-node";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -9,24 +8,14 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import { getTools } from "./tools.js";
-
-
-import { msal } from "./settings.js";
+import { getToken } from "./auth.js";
 
 async function main(): Promise<void> {
-
-    const confidentialClient = new ConfidentialClientApplication(msal.init);
 
     const context = {
 
         async getToken(): Promise<string> {
-
-            // Acquire token using the initialized MSAL application
-            const tokenResponse = await confidentialClient.acquireTokenByClientCredential({
-                scopes: msal.scopes,
-            });
-
-            return tokenResponse.accessToken;
+            return getToken();
         }
     }
 

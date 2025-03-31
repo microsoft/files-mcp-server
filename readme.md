@@ -5,8 +5,30 @@ This library provides an MCP server for local testing with any client that suppo
 ## Install
 
 1. Clone this repository locally (will update once we are published to NPM)
-2. Create a copt of `/src/settings-example.ts` at `/src/settings.ts` and update the required values with your EntraId Application details. You will need Application/Files.Read.All role.
-3. In your MCP client of choice add this server using `npx -y {ABSOLUTE LOCAL PATH}\onedrive-mcp-server`
+2. In your MCP client of choice add this server using `npx -y {ABSOLUTE LOCAL PATH}\onedrive-mcp-server`
+3. Edit the server configuration to include the require env vars
+   ```json
+   {
+    "mcp": {
+        "servers": {
+            "my-mcp-server-1da66260": {
+                    "type": "stdio",
+                    "command": "npx",
+                    "args": [
+                        "-y",
+                        "D:\\github\\onedrive-mcp-server"
+                    ],
+                    "env": {
+                        "ODMCP_TENANT_ID": "{TENANT_ID}",
+                        "ODMCP_CLIENT_ID": "{CLIENT_ID}",
+                        "ODMCP_THUMBPRINT": "{THUMBPRINT}",
+                        "ODMCP_PRIVATE_KEY": "{BASE64_ENCODED_PRIVATE_KEY}",
+                    },
+                },
+             }
+        }
+   }
+   ```
 4. Begin interacting with the server
 
 ## Local Testing

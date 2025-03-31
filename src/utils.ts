@@ -27,3 +27,11 @@ export async function parseResposneToResult(response: Response): Promise<CallToo
         ],
     };
 }
+
+export function encodeKey(key: string): string {
+    return Buffer.from(key).toString('base64');
+}
+
+export function decodeKey(key: string): string {
+    return Buffer.from(key, 'base64').toString('ascii');
+}

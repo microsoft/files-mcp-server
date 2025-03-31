@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p . && shx chmod +x build/*.js",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "encode-key": "npm run build && node build/encode-key.js"
   },
   "repository": {
     "type": "git",
