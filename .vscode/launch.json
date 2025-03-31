@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/index.ts",
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "build",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/build/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Debug Watch",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/index.ts",
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "build-watch",
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/build/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

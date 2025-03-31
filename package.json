@@ -1,0 +1,35 @@
+{
+  "name": "onedrive-mcp-server",
+  "version": "0.0.1",
+  "description": "An MCP server for OneDrive",
+  "main": "build/index.js",
+  "type": "module",
+  "bin": {
+    "onedrive-mcp-slack": "build/index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p . && shx chmod +x build/*.js",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/microsoft/onedrive-mcp-server.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/microsoft/onedrive-mcp-server/issues"
+  },
+  "homepage": "https://github.com/microsoft/onedrive-mcp-server#readme",
+  "devDependencies": {
+    "@types/node": "^18.19.84",
+    "shx": "^0.4.0",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^3.4.1",
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@pnp/logging": "^4.11.0"
+  }
+}
