@@ -15,8 +15,6 @@ export async function getTools(): Promise<DynamicTool[]> {
         const dirPath = resolve(__dirname, "tools")
         const toolFiles = await readdir(dirPath);
 
-        console.error(JSON.stringify(toolFiles));
-
         for (let i = 0; i < toolFiles.length; i++) {
 
             const toolFile = toolFiles[i];

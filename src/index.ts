@@ -31,7 +31,7 @@ async function main(): Promise<void> {
 
     server.setRequestHandler(ListToolsRequestSchema, async () => {
 
-        console.error("Received ListToolsRequest");
+        console.log("Received ListToolsRequest");
 
         let tools;
 
@@ -44,7 +44,7 @@ async function main(): Promise<void> {
             console.error(`Error listing tools: ${e}`);
         }
 
-        console.error("Got Tools!");
+        console.log("Got Tools!");
 
         return { tools };
     });
@@ -53,15 +53,11 @@ async function main(): Promise<void> {
         CallToolRequestSchema,
         async (request: CallToolRequest) => {
 
-            console.error("Received CallToolRequest:", request);
+            console.log("Received CallToolRequest:", request);
 
             const tools = await getTools();
 
             try {
-
-                if (!request.params.arguments) {
-                    throw new Error("No arguments provided");
-                }
 
                 const tool = tools.filter(t => t.name === request.params.name);
                 if (tool.length < 1) {

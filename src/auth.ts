@@ -1,8 +1,6 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { decodeKey } from "./utils.js";
 
-console.error(JSON.stringify(process.env, null, 2));
-
 const tentantId = process.env.ODMCP_TENANT_ID;
 const clientId = process.env.ODMCP_CLIENT_ID;
 const thumbprint = process.env.ODMCP_THUMBPRINT;
