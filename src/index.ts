@@ -9,46 +9,43 @@ import {
 
 import { getTools } from "./tools.js";
 import { getToken } from "./auth.js";
+import { formatResponse } from "./utils.js";
 
 async function main(): Promise<void> {
 
-    const context = {
+    // setup the server
+    const server = new Server(
+        {
+            name: "OneDrive-MCP-Server",
+            version: "0.0.1",
+        },
+        {
+            capabilities: {
+                tools: {},
+            },
+        }
+    );
 
+    // context passed to all tools
+    const context = {
         async getToken(): Promise<string> {
             return getToken();
         }
     }
 
-    const server = new Server({
-        name: "OneDrive-MCP-Server",
-        version: "0.0.1",
-    },
-        {
-            capabilities: {
-                tools: {},
-            },
-        });
-
+    // this allows us to list tools
     server.setRequestHandler(ListToolsRequestSchema, async () => {
 
         console.log("Received ListToolsRequest");
 
-        let tools;
-
-        try {
-
-            tools = await getTools();
-
-        } catch (e) {
-
-            console.error(`Error listing tools: ${e}`);
-        }
+        const tools = await getTools();
 
         console.log("Got Tools!");
 
         return { tools };
     });
 
+    // this handles individual tool requests, mapping them to the appropriate tool
     server.setRequestHandler(
         CallToolRequestSchema,
         async (request: CallToolRequest) => {
@@ -68,17 +65,9 @@ async function main(): Promise<void> {
 
             } catch (e) {
 
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify({
-                                error: e instanceof Error ? e.message : String(e),
-                            }),
-                        },
-                    ],
-                };
-
+                return formatResponse({
+                    error: e instanceof Error ? e.message : String(e),
+                });
             }
         });
 

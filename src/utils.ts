@@ -18,11 +18,15 @@ export async function parseResposneToResult(response: Response): Promise<CallToo
         responseData = { rawResponse: responseText };
     }
 
+    return formatResponse(responseData);
+}
+
+export function formatResponse(value: any, type: "text" = "text"): CallToolResult {
     return {
         content: [
             {
-                type: "text",
-                text: JSON.stringify(responseData, null, 4),
+                type,
+                text: JSON.stringify(value, null, 4),
             },
         ],
     };

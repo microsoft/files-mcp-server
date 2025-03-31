@@ -1,10 +1,19 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { decodeKey } from "./utils.js";
 
-const tentantId = process.env.ODMCP_TENANT_ID;
-const clientId = process.env.ODMCP_CLIENT_ID;
-const thumbprint = process.env.ODMCP_THUMBPRINT;
-const privateKey = decodeKey(process.env.ODMCP_PRIVATE_KEY);
+function safeReadEnv(name: string) {
+
+    if (typeof process.env[name] === "string" && process.env[name] !== null && process.env[name].length > 0) {
+        return process.env[name];
+    }
+
+    throw Error(`Could not read env property ${name}`);
+}
+
+const tentantId = safeReadEnv("ODMCP_TENANT_ID");
+const clientId = safeReadEnv("ODMCP_CLIENT_ID");;
+const thumbprint = safeReadEnv("ODMCP_THUMBPRINT");
+const privateKey = decodeKey(safeReadEnv("ODMCP_PRIVATE_KEY"));
 
 const confidentialClient = new ConfidentialClientApplication({
     auth: {
