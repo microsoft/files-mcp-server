@@ -2,7 +2,7 @@ import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types
 import { ToolContext } from "../types.js";
 import { combine } from "../utils.js";
 
-export const name = "onedrive_list_drive_children";
+export const name = "files_list_drive_children";
 
 export const description = "Lists the children of a drive";
 

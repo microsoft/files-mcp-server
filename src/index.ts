@@ -18,12 +18,13 @@ async function main(): Promise<void> {
     // setup the server
     const server = new Server(
         {
-            name: "OneDrive-MCP-Server",
+            name: "Files-MCP-Server",
             version: "0.0.1",
         },
         {
             capabilities: {
                 tools: {},
+                prompts: {                }
             },
         }
     );
@@ -49,13 +50,7 @@ async function main(): Promise<void> {
 
     // this allows us to list tools
     server.setRequestHandler(ListToolsRequestSchema, async () => {
-
-        console.log("Received ListToolsRequest");
-
         const tools = await getTools();
-
-        console.log("Got Tools!");
-
         return { tools };
     });
 
@@ -63,8 +58,6 @@ async function main(): Promise<void> {
     server.setRequestHandler(
         CallToolRequestSchema,
         async (request: CallToolRequest) => {
-
-            console.log("Received CallToolRequest:", request);
 
             const tools = await getTools();
 
@@ -86,9 +79,9 @@ async function main(): Promise<void> {
         });
 
     const transport = new StdioServerTransport();
-    console.error("Connecting server to transport...");
+    console.log("Connecting server to transport...");
     await server.connect(transport);
-    console.log("Running.");
+    console.log("Files MCP Server is Running");
 }
 
 main().catch((error) => {

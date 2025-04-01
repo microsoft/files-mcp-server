@@ -2,7 +2,7 @@ import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types
 import { ToolContext } from "../types.js";
 import { combine } from "../utils.js";
 
-export const name = "onedrive_get_drive";
+export const name = "files_get_drive";
 
 export const description = "Get the details about a single Drive by id";
 

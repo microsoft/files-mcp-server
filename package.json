@@ -1,11 +1,11 @@
 {
-  "name": "onedrive-mcp-server",
+  "name": "@microsoft/files-mcp-server",
   "version": "0.0.1",
-  "description": "An MCP server for OneDrive",
+  "description": "An MCP server for M365 Files",
   "main": "build/index.js",
   "type": "module",
   "bin": {
-    "onedrive-mcp-slack": "build/index.js"
+    "files-mcp-server": "build/index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/microsoft/onedrive-mcp-server.git"
+    "url": "git+https://github.com/microsoft/files-mcp-server.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/microsoft/onedrive-mcp-server/issues"
+    "url": "https://github.com/microsoft/files-mcp-server/issues"
   },
-  "homepage": "https://github.com/microsoft/onedrive-mcp-server#readme",
+  "homepage": "https://github.com/microsoft/files-mcp-server#readme",
   "devDependencies": {
     "@types/node": "^18.19.84",
     "shx": "^0.4.0",
