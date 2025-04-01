@@ -35,20 +35,13 @@ This library provides an MCP server for local testing with any client that suppo
 
 Once you have installed the server locally you can make updates in the project and restart it from the client to discover/test new tools.
 
-## Contributing
+## Encode private key
 
-You can easily contribute new tools in the `/src/tools` folder by adding a module and following the patter:
+To help you base64 encode your certificate's private key you can update the file /src/encodekey.ts with your private key and run `npm run encode-key`. The base64 encoded key will be output on the commandline.
 
-```TS
-export const name = "{NAME OF THE TOOL}";
+> Do NOT check in updates to the encodekey.ts file including your private key information 🙂.
 
-export const description = "{DESCRIPTION OF THE TOOL}";
+## Trademarks
 
-export const inputSchema = {}; // ANY REQUIRED INPUT SCHEMA
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow Microsoft’s Trademark & Brand Guidelines. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
 
-// UPDATE THE HANDLER LOGIC AS REQUIRED
-export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<CallToolResult> {
-
-    return this.fetch("https://graph.microsoft.com/v1.0/drives");
-};
-```
