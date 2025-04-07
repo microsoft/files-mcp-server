@@ -24,7 +24,6 @@ async function main(): Promise<void> {
         {
             capabilities: {
                 tools: {},
-                prompts: {                }
             },
         }
     );
