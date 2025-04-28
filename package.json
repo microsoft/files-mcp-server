@@ -24,13 +24,16 @@
   },
   "homepage": "https://github.com/microsoft/files-mcp-server#readme",
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "@types/node": "^18.19.84",
+    "nodemon": "^3.1.10",
     "shx": "^0.4.0",
     "typescript": "^5.8.2"
   },
   "dependencies": {
     "@azure/msal-node": "^3.4.1",
-    "@modelcontextprotocol/sdk": "^1.8.0",
-    "@pnp/logging": "^4.11.0"
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@pnp/logging": "^4.11.0",
+    "express": "^5.1.0"
   }
 }

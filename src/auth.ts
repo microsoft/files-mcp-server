@@ -4,8 +4,6 @@ import { ToolContext } from "./types.js";
 
 function safeReadEnv(name: string): string {
 
-    console.error("here2: " + name);
-
     if (!stringIsNullOrEmpty(process.env[name])) {
         return process.env[name];
     }

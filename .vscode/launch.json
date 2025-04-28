@@ -21,7 +21,8 @@
       ],
       "skipFiles": [
         "<node_internals>/**"
-      ]
+      ],
+      "envFile": "${workspaceFolder}/.env"
     },
     {
       "name": "Debug Watch",
@@ -31,9 +32,11 @@
       "args": [],
       "cwd": "${workspaceRoot}",
       "preLaunchTask": "build-watch",
-      "runtimeExecutable": null,
+      "runtimeExecutable": "nodemon",
       "runtimeArgs": [
-        "--nolazy"
+        "--nolazy",
+        "--watch",
+        "build"
       ],
       "console": "internalConsole",
       "internalConsoleOptions": "openOnSessionStart",
@@ -43,7 +46,8 @@
       ],
       "skipFiles": [
         "<node_internals>/**"
-      ]
+      ],
+      "envFile": "${workspaceFolder}/.env"
     }
   ]
 }

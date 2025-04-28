@@ -1,34 +1,86 @@
-import { CallToolResult } from "@modelcontextprotocol/sdk/types";
+import { AudioContent, BlobResourceContents, CallToolResult, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
 
-export async function parseResposneToResult(response: Response): Promise<CallToolResult> {
-
-    const responseText = await response.text();
+export async function parseResponseToResult(response: Response): Promise<CallToolResult> {
 
     if (!response.ok) {
-        throw Error(`(${response.status}): ${JSON.stringify(responseText)}`);
+        throw Error(`(${response.status}): ${JSON.stringify(await response.text())}`);
     }
 
     let responseData: any;
+    let mimeType = response.headers.get("Content-Type");
 
     try {
-        // Try to parse as JSON
-        responseData = responseText ? JSON.parse(responseText) : {};
+
+        if (/text|json/i.test(mimeType)) {
+
+            const responseText = await response.text();
+            // Try to parse as JSON
+            responseData = responseText ? JSON.parse(responseText) : {};
+
+        } else {
+
+            const buffer = await response.arrayBuffer();
+            responseData = Buffer.from(buffer).toString("base64");
+        }
+
     } catch (e) {
+
+        console.error(e);
+
         // If not JSON, use the raw text
-        responseData = { rawResponse: responseText };
+        responseData = { rawResponse: `Error: ${e}` };
     }
 
-    return formatResponse(responseData);
+    return formatResponse(responseData, mimeType);
 }
 
-export function formatResponse(value: any, type: "text" = "text"): CallToolResult {
-    return {
-        content: [
-            {
-                type,
-                text: JSON.stringify(value, null, 4),
-            },
-        ],
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
+
+export type ValidCallToolResults = TextContent | ImageContent | AudioContent | BlobResourceContents | { rawResponse: string };
+
+export function formatResponse(value: any, mimeType: string = "text/json"): CallToolResult {
+
+    let resultContent: ValidCallToolResults[] = [];
+
+    if (/text|json/i.test(mimeType)) {
+
+        resultContent.push(
+            <TextContent>{
+                type: "text",
+                text: JSON.stringify(value, null, 2),
+            });
+
+    } else if (/image\//i.test(mimeType)) {
+
+        resultContent.push(
+            <ImageContent>{
+                type: "image",
+                data: value,
+                mimeType: mimeType,
+            });
+
+    } else if (/audio\//i.test(mimeType)) {
+
+        resultContent.push(
+            <AudioContent>{
+                type: "audio",
+                data: value,
+                mimeType,
+            });
+
+    } else {
+
+        resultContent.push(
+            <BlobResourceContents>{
+                type: "resource",
+                mimeType,
+                blob: value,
+            });
+    }
+
+    return <CallToolResult>{
+        role: "user",
+        content: resultContent,
     };
 }
 

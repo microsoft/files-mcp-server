@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { DynamicTool } from "./types";
+import { DynamicTool } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
 

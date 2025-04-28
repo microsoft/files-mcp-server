@@ -6,7 +6,7 @@
         "**/node_modules": true,
         "coverage": true,
         ".nyc_output": true,
-        "build": true,
+        "build": false,
     },
     "typescript.validate.enable": true,
     "typescript.tsdk": "./node_modules/typescript/lib",
