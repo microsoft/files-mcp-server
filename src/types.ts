@@ -1,4 +1,4 @@
-import { CallToolRequest, CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
+import { AudioContent, BlobResourceContents, CallToolRequest, CallToolResult, ImageContent, TextContent, Tool } from "@modelcontextprotocol/sdk/types.js";
 
 export interface ToolContext {
     fetch(path: string, init?: RequestInit, parser?: (Response) => CallToolResult): Promise<CallToolResult>;
@@ -12,3 +12,5 @@ export interface DynamicTool extends Tool {
     }
     handler: (this: ToolContext, request: CallToolRequest) => Promise<any>;
 }
+
+export type ValidCallToolResults = TextContent | ImageContent | AudioContent | BlobResourceContents | { rawResponse: string };

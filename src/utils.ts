@@ -1,4 +1,5 @@
 import { AudioContent, BlobResourceContents, CallToolResult, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
+import { ValidCallToolResults } from "./types";
 
 export async function parseResponseToResult(response: Response): Promise<CallToolResult> {
 
@@ -35,8 +36,6 @@ export async function parseResponseToResult(response: Response): Promise<CallToo
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
-
-export type ValidCallToolResults = TextContent | ImageContent | AudioContent | BlobResourceContents | { rawResponse: string };
 
 export function formatResponse(value: any, mimeType: string = "text/json"): CallToolResult {
 

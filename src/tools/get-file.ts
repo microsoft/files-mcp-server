@@ -1,5 +1,5 @@
-import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { ToolContext } from "../types.js";
+import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { ToolContext, ValidCallToolResults } from "../types.js";
 import { combine, parseResponseToResult } from "../utils.js";
 
 export const name = "files_get_file_2";
@@ -30,15 +30,17 @@ export const inputSchema = {
     required: ["drive_id", "item_id"],
 };
 
-export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<CallToolResult> {
+export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<ValidCallToolResults[]> {
 
         const operations: string[] = <string[]>request.params.arguments.operations || ["metadata"];
 
         const driveItemPathBase = combine(this.graphBaseUrl, this.graphVersionPart, "drives", <string>request.params.arguments.drive_id, "items", <string>request.params.arguments.item_id);
 
-        // const responses: CallToolResult[] = [];
+        const responses: ValidCallToolResults[] = [];
 
         let driveItemPath = driveItemPathBase;
+
+        const parser = parseResponseToResult.bind(this);
 
         for (let i = 0; i < operations.length; i++) {            
 
@@ -51,9 +53,8 @@ export const handler = async function (this: ToolContext, request: CallToolReque
                 driveItemPath = combine(driveItemPath, "content?format=pdf");
             }
 
-            // responses.push(await this.fetch(driveItemPath, {}, parser);
+            responses.push(await this.fetch(driveItemPath, {}, parser));
         }
 
-        // just testing, trying to work out returning binary data
-        return this.fetch(driveItemPath, {}, parseResponseToResult.bind(this));
+        return responses;
 };

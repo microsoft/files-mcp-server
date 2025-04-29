@@ -1,7 +1,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { formatResponse, parseResponseToResult } from "./utils.js";
-import { CallToolRequest, CallToolRequestSchema, ListToolsRequestSchema, ListToolsResult, Tool, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { getTools } from "./tools.js";
+import { parseResponseToResult } from "./utils.js";
+import { CallToolRequestSchema, ListToolsRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { callToolHandler, getToolsHandler } from "./tools.js";
 import { ToolContext } from "./types.js";
 import { getToken } from "./auth.js";
 
@@ -43,56 +43,10 @@ export async function setupMCPServer(): Promise<Server> {
     }
 
     // this allows us to list tools
-    server.setRequestHandler(ListToolsRequestSchema, async () => {
-        const tools = await getTools();
-
-        const returnTools = [];
-
-        // map to accepted array
-        for (let i = 0; i < tools.length; i++) {
-
-            let tool: Tool = {
-                name: tools[i].name,
-                description: tools[i].description,
-            }
-
-            if (tools[i].inputSchema) {
-                tool.inputSchema = tools[i].inputSchema;
-            }
-
-            returnTools.push(tool);
-        }
-
-        return <ListToolsResult>{
-            tools: returnTools,
-        };
-    });
+    server.setRequestHandler(ListToolsRequestSchema, getToolsHandler);
 
     // this handles individual tool requests, mapping them to the appropriate tool
-    server.setRequestHandler(
-        CallToolRequestSchema,
-        async (request: CallToolRequest) => {
-
-            const tools = await getTools();
-
-            try {
-
-                const tool = tools.filter(t => t.name === request.params.name);
-                if (tool.length < 1) {
-                    throw Error(`Could not locate tool "${request.params.name}".`);
-                }
-
-                return tool[0].handler.call(context, request)
-
-            } catch (e) {
-
-                console.error("Fatal error in calling tool:", e);
-
-                return formatResponse({
-                    error: e instanceof Error ? e.message : String(e),
-                });
-            }
-        });
+    server.setRequestHandler(CallToolRequestSchema, callToolHandler.bind(context));
 
     return server;
 }

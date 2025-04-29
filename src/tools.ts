@@ -1,7 +1,9 @@
 import { readdir } from "fs/promises";
-import { DynamicTool } from "./types.js";
+import { DynamicTool, ToolContext } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
+import { CallToolRequest, Tool, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatResponse } from "./utils.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -27,4 +29,48 @@ export async function getTools(): Promise<DynamicTool[]> {
     }
 
     return tools;
+}
+
+export async function getToolsHandler(): Promise<ListToolsResult> {
+
+    const tools = await getTools();
+
+    return {
+        tools: tools.map(tool => (
+            {
+                inputSchema: {
+                    type: "object",
+                    properties: {},
+                    required: [],
+                },
+                ...tool,
+            })),
+    };
+}
+
+export async function callToolHandler(this: ToolContext, request: CallToolRequest) {
+
+    const tools = await getTools();
+
+    try {
+
+        const tool = tools.filter(t => t.name === request.params.name);
+        if (tool.length < 1) {
+            throw Error(`Could not locate tool "${request.params.name}".`);
+        }
+
+        return tool[0].handler.call(this, request)
+
+    } catch (e) {
+
+        console.error("Fatal error in calling tool:", e);
+
+        return formatResponse({
+            error: e instanceof Error ? e.message : String(e),
+        });
+    }
+}
+
+export function clearTools() {
+    tools.length = 0;
 }
