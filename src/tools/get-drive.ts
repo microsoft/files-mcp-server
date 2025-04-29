@@ -1,5 +1,5 @@
-import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { ToolContext } from "../types.js";
+import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { ToolContext, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 
 export const name = "files_get_drive";
@@ -17,7 +17,7 @@ export const inputSchema = {
     required: ["drive_id"],
 };
 
-export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<CallToolResult> {
+export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<ValidCallToolResult> {
 
     return this.fetch(combine(this.graphBaseUrl, this.graphVersionPart, "drives", <string>request.params.arguments.drive_id));
 };

@@ -1,5 +1,5 @@
 import { AudioContent, BlobResourceContents, CallToolResult, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
-import { ValidCallToolResults } from "./types";
+import { ValidCallToolContent } from "./types";
 
 export async function parseResponseToResult(response: Response): Promise<CallToolResult> {
 
@@ -39,7 +39,7 @@ export async function parseResponseToResult(response: Response): Promise<CallToo
 
 export function formatResponse(value: any, mimeType: string = "text/json"): CallToolResult {
 
-    let resultContent: ValidCallToolResults[] = [];
+    let resultContent: ValidCallToolContent[] = [];
 
     if (/text|json/i.test(mimeType)) {
 

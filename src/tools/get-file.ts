@@ -1,14 +1,14 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { ToolContext, ValidCallToolResults } from "../types.js";
+import { ToolContext, ValidCallToolResult } from "../types.js";
 import { combine, parseResponseToResult } from "../utils.js";
 
 export const name = "files_get_file_2";
 
 export const description = "Get the content, metadata, or pdf representation of a file. It supports three operations, 'metadata', 'content', or 'pdf'. You can supply one or more operations at a time.";
 
-// export const annotations = {
-//     readOnlyHint: true,
-// }
+export const annotations = {
+    readOnlyHint: true,
+}
 
 export const inputSchema = {
     type: "object",
@@ -30,31 +30,37 @@ export const inputSchema = {
     required: ["drive_id", "item_id"],
 };
 
-export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<ValidCallToolResults[]> {
+export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<ValidCallToolResult> {
 
-        const operations: string[] = <string[]>request.params.arguments.operations || ["metadata"];
+    const operations: string[] = <string[]>request.params.arguments.operations || ["metadata"];
 
-        const driveItemPathBase = combine(this.graphBaseUrl, this.graphVersionPart, "drives", <string>request.params.arguments.drive_id, "items", <string>request.params.arguments.item_id);
+    const driveItemPathBase = combine(this.graphBaseUrl, this.graphVersionPart, "drives", <string>request.params.arguments.drive_id, "items", <string>request.params.arguments.item_id);
 
-        const responses: ValidCallToolResults[] = [];
+    const responses: ValidCallToolResult[] = [];
 
-        let driveItemPath = driveItemPathBase;
+    let driveItemPath = driveItemPathBase;
 
-        const parser = parseResponseToResult.bind(this);
+    const parser = parseResponseToResult.bind(this);
 
-        for (let i = 0; i < operations.length; i++) {            
+    for (let i = 0; i < operations.length; i++) {
 
-            if (/content/i.test(operations[i])) {
+        if (/content/i.test(operations[i])) {
 
-                driveItemPath = combine(driveItemPath, "contentStream");
+            driveItemPath = combine(driveItemPath, "contentStream");
 
-            } else if (/pdf/i.test(operations[i])) {
+        } else if (/pdf/i.test(operations[i])) {
 
-                driveItemPath = combine(driveItemPath, "content?format=pdf");
-            }
-
-            responses.push(await this.fetch(driveItemPath, {}, parser));
+            driveItemPath = combine(driveItemPath, "content?format=pdf");
         }
 
-        return responses;
+        responses.push(await this.fetch(driveItemPath, {}, parser));
+    }
+
+    return <ValidCallToolResult>{
+        role: "user",
+        content: responses.reduce((pv, v, i) => {
+            pv.push(...v.content);
+            return pv;
+        }, []),
+    };
 };

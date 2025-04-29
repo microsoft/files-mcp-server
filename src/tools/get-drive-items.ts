@@ -1,5 +1,5 @@
-import { CallToolRequest, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { ToolContext } from "../types.js";
+import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { ToolContext, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 
 export const name = "files_list_drive_items";
@@ -21,7 +21,7 @@ export const inputSchema = {
     required: ["drive_id", "filter"],
 };
 
-export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<CallToolResult> {
+export const handler = async function (this: ToolContext, request: CallToolRequest): Promise<ValidCallToolResult> {
 
     const query = `$filter=${<string>request.params.arguments.filter}`;
 
