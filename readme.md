@@ -31,9 +31,19 @@ This library provides an MCP server for local testing with any client that suppo
    ```
 4. Begin interacting with the server
 
-## Local Testing
+## Local Development
 
-Once you have installed the server locally you can make updates in the project and restart it from the client to discover/test new tools.
+1. Create a .env file
+
+```
+ODMCP_TENANT_ID="{TENANT_ID}"
+ODMCP_CLIENT_ID="{CLIENT_ID}"
+ODMCP_THUMBPRINT="{THUMBPRINT}"
+ODMCP_PRIVATE_KEY="{BASE64_ENCODED_PRIVATE_KEY}"
+```
+2. Hit F5 to start the server and debug
+3. [Inspector](https://github.com/modelcontextprotocol/inspector) works well for testing the MCP server itself or use your LLM Client of choice!
+
 
 ## Encode private key
 
