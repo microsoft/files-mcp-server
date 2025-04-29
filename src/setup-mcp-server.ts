@@ -1,8 +1,8 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { parseResponseToResult } from "./utils.js";
-import { CallToolRequestSchema, ListToolsRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { callToolHandler, getToolsHandler } from "./tools.js";
-import { ToolContext } from "./types.js";
+import { ToolContext, ValidCallToolResult } from "./types.js";
 import { getToken } from "./auth.js";
 
 export async function setupMCPServer(): Promise<Server> {
@@ -24,7 +24,7 @@ export async function setupMCPServer(): Promise<Server> {
     const context: ToolContext = {
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
-        async fetch(path: string, init?: RequestInit): Promise<CallToolResult> {
+        async fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult> {
 
             const token = await getToken(this);
 

@@ -16,5 +16,6 @@ export interface DynamicTool extends Tool {
 export type ValidCallToolContent = TextContent | ImageContent | AudioContent | BlobResourceContents;
 
 export type ValidCallToolResult = CallToolResult & {
+    role: "user" | "assistant",
     content: ValidCallToolContent,
 }

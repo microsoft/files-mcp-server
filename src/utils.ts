@@ -1,7 +1,7 @@
-import { AudioContent, BlobResourceContents, CallToolResult, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
-import { ValidCallToolContent } from "./types";
+import { AudioContent, BlobResourceContents, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
+import { ValidCallToolContent, ValidCallToolResult } from "./types";
 
-export async function parseResponseToResult(response: Response): Promise<CallToolResult> {
+export async function parseResponseToResult(response: Response): Promise<ValidCallToolResult> {
 
     if (!response.ok) {
         throw Error(`(${response.status}): ${JSON.stringify(await response.text())}`);
@@ -32,12 +32,12 @@ export async function parseResponseToResult(response: Response): Promise<CallToo
         responseData = { rawResponse: `Error: ${e}` };
     }
 
-    return formatResponse(responseData, mimeType);
+    return formatCallToolResult(responseData, mimeType);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
 
-export function formatResponse(value: any, mimeType: string = "text/json"): CallToolResult {
+export function formatCallToolResult(value: any, mimeType: string = "text/json"): ValidCallToolResult {
 
     let resultContent: ValidCallToolContent[] = [];
 
@@ -77,7 +77,7 @@ export function formatResponse(value: any, mimeType: string = "text/json"): Call
             });
     }
 
-    return <CallToolResult>{
+    return <ValidCallToolResult>{
         role: "user",
         content: resultContent,
     };

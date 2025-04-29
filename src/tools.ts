@@ -2,8 +2,8 @@ import { readdir } from "fs/promises";
 import { DynamicTool, ToolContext } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
-import { CallToolRequest, Tool, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
-import { formatResponse } from "./utils.js";
+import { CallToolRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatCallToolResult } from "./utils.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -65,7 +65,7 @@ export async function callToolHandler(this: ToolContext, request: CallToolReques
 
         console.error("Fatal error in calling tool:", e);
 
-        return formatResponse({
+        return formatCallToolResult({
             error: e instanceof Error ? e.message : String(e),
         });
     }
