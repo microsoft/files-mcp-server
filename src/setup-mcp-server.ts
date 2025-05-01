@@ -1,11 +1,17 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { parseResponseToResult } from "./utils.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import {
+    CallToolRequestSchema,
+    ListResourcesRequestSchema,
+    ListResourceTemplatesRequestSchema,
+    ListToolsRequestSchema,
+    ReadResourceRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 import { callToolHandler, getToolsHandler } from "./tools.js";
-import { ToolContext, ValidCallToolResult } from "./types.js";
-import { getToken } from "./auth.js";
+import { MCPContext } from "./context.js";
+import { getResourcesHandler, readResourceHandler } from "./resources.js";
+import { getResourceTemplatesHandler } from "./resourceTemplates.js";
 
-export async function setupMCPServer(): Promise<Server> {
+export async function setupMCPServer(context: MCPContext): Promise<Server> {
 
     // setup the server
     const server = new Server(
@@ -16,37 +22,25 @@ export async function setupMCPServer(): Promise<Server> {
         {
             capabilities: {
                 tools: {},
+                resources: {},
             },
         }
     );
 
-    // context passed to all tools
-    const context: ToolContext = {
-        graphBaseUrl: "https://graph.microsoft.com",
-        graphVersionPart: "v1.0",
-        async fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult> {
-
-            const token = await getToken(this);
-
-            console.log(`FETCH PATH: ${path}`);
-
-            const response = await fetch(path, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
-                ...init,
-            });
-
-            return parseResponseToResult(response);
-        },
-    }
-
     // this allows us to list tools
-    server.setRequestHandler(ListToolsRequestSchema, getToolsHandler);
+    server.setRequestHandler(ListToolsRequestSchema, getToolsHandler.bind(context));
 
     // this handles individual tool requests, mapping them to the appropriate tool
     server.setRequestHandler(CallToolRequestSchema, callToolHandler.bind(context));
+
+    // this allows us to list resources
+    server.setRequestHandler(ListResourcesRequestSchema, getResourcesHandler.bind(context));
+
+    // and read a resource
+    server.setRequestHandler(ReadResourceRequestSchema, readResourceHandler.bind(context));
+
+    // list all the resource templates
+    server.setRequestHandler(ListResourceTemplatesRequestSchema, getResourceTemplatesHandler.bind(context));
 
     return server;
 }

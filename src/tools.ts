@@ -1,12 +1,12 @@
 import { readdir } from "fs/promises";
-import { DynamicTool, ToolContext } from "./types.js";
+import { DynamicTool } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
 import { CallToolRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { formatCallToolResult } from "./utils.js";
+import { MCPContext } from "./context.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
 const tools = [];
 
 export async function getTools(): Promise<DynamicTool[]> {
@@ -15,7 +15,7 @@ export async function getTools(): Promise<DynamicTool[]> {
 
         // Load tools from the tools directory
         const dirPath = resolve(__dirname, "tools")
-        const toolFiles = await readdir(dirPath);
+        const toolFiles = await readdir(dirPath, { recursive: true });
 
         for (let i = 0; i < toolFiles.length; i++) {
 
@@ -31,7 +31,7 @@ export async function getTools(): Promise<DynamicTool[]> {
     return tools;
 }
 
-export async function getToolsHandler(): Promise<ListToolsResult> {
+export async function getToolsHandler(this: MCPContext): Promise<ListToolsResult> {
 
     const tools = await getTools();
 
@@ -48,7 +48,7 @@ export async function getToolsHandler(): Promise<ListToolsResult> {
     };
 }
 
-export async function callToolHandler(this: ToolContext, request: CallToolRequest) {
+export async function callToolHandler(this: MCPContext, request: CallToolRequest) {
 
     const tools = await getTools();
 

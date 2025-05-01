@@ -1,16 +1,35 @@
-import { AudioContent, BlobResourceContents, CallToolRequest, CallToolResult, ImageContent, TextContent, Tool } from "@modelcontextprotocol/sdk/types.js";
+import {
+    AudioContent,
+    BlobResourceContents,
+    CallToolRequest,
+    CallToolResult,
+    ImageContent,
+    ReadResourceRequest,
+    ReadResourceResult,
+    Resource,
+    ResourceTemplate,
+    TextContent,
+    Tool,
+} from "@modelcontextprotocol/sdk/types.js";
+import { MCPContext } from "./context.js";
 
-export interface ToolContext {
-    fetch(path: string, init?: RequestInit, parser?: (Response) => CallToolResult): Promise<ValidCallToolResult>;
-    graphBaseUrl: string;
-    graphVersionPart: string;
-}
+export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD";
 
 export interface DynamicTool extends Tool {
     annotations?: {
         [key: string]: unknown;
     }
-    handler: (this: ToolContext, request: CallToolRequest) => Promise<ValidCallToolResult>;
+    modes: DynamicToolMode[];
+    handler: (this: MCPContext, request: CallToolRequest) => Promise<ValidCallToolResult>;
+}
+
+export interface DynamicResource {
+    publish(this: MCPContext): Promise<Resource[]>;
+    handler(this: MCPContext, request: ReadResourceRequest): Promise<ReadResourceResult>;
+}
+
+export interface DynamicResourceTemplate {
+    publish(this: MCPContext): Promise<ResourceTemplate[]>;
 }
 
 export type ValidCallToolContent = TextContent | ImageContent | AudioContent | BlobResourceContents;

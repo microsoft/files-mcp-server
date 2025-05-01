@@ -1,9 +1,12 @@
 import { setupExpressServer } from "./setup-express-server.js";
+import { getCurrentContext } from "./context.js";
 import { setupMCPServer } from "./setup-mcp-server.js";
 
 async function main(): Promise<void> {
 
-    const server = await setupMCPServer();
+    // maybe in the future we need to set somethings or supply values for context establishment
+    const context = await getCurrentContext();
+    const server = await setupMCPServer(context);
     const app = await setupExpressServer(server);
 
     const PORT = process.env.PORT || 3001;
