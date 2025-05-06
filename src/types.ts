@@ -24,7 +24,7 @@ export interface DynamicTool extends Tool {
 }
 
 export interface DynamicResource {
-    publish(this: MCPContext): Promise<Resource[]>;
+    publish(this: MCPContext): Promise<Resource[]>;    
     handler(this: MCPContext, request: ReadResourceRequest): Promise<ReadResourceResult>;
 }
 
@@ -38,3 +38,5 @@ export type ValidCallToolResult = CallToolResult & {
     role: "user" | "assistant",
     content: ValidCallToolContent,
 }
+
+export type ResourceReadHandlerMap = Map<(uri: URL) => boolean, (this: MCPContext, uri: URL, request: ReadResourceRequest) => Promise<Resource[]>>;

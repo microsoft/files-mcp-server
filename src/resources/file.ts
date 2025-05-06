@@ -1,10 +1,10 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
+import { processResourceHandlers } from "./process-resource-handlers.js";
+import { ResourceReadHandlerMap } from "../types.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
-
     // resources of a file are alt streams, formats, content, metadata, versions, size info
-
     return [];
 }
 
@@ -18,34 +18,13 @@ export async function handler(this: MCPContext, request: ReadResourceRequest): P
         return;
     }
 
-    const resourcePromises: Promise<Resource[]>[] = [];
-
-    handlers.forEach((func, key) => {
-        if (key(uri)) {
-            resourcePromises.push(func.call(this, uri, request));
-        }
-    });
-
-    const resources = (await Promise.all(resourcePromises)).flat();
-
-    if (resources.length < 1) {
-
-        resources.push({
-            uri: "error://resource-not-found",
-            mimeType: "application/json",
-            text: JSON.stringify({ error: `Resource could not be located in files for uri ${uri.toString()}.` }),
-        });
-    }
-
-    return <ReadResourceResult>{
-        contents: resources,
-    };
+    return processResourceHandlers.call(this, uri, request, handlers);
 }
 
 /**
  * This is a map of [function, handler] tuples. If the function returns true, the handler is used.
  */
-const handlers = new Map<(uri: URL) => boolean, (this: MCPContext, uri: URL, request: ReadResourceRequest) => Promise<Resource[]>>([
+const handlers: ResourceReadHandlerMap = new Map([
     [
         // handle any file based protocol with default handlers
         (uri) => /^file:$/i.test(uri.protocol),
