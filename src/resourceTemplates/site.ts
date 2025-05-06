@@ -20,6 +20,5 @@ export async function publish(this: MCPContext): Promise<ResourceTemplate[]> {
         uriTemplate: "file://{file-id}",
         name: "Get a file from this site by id",
         description: "Gets a file's information by file id for files within this site. You can replace {file-id} with a valid file id.",
-        mimeType: "application/json",
     }];
 }
