@@ -1,15 +1,17 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 import { MCPContext } from "../context.js";
 
-export const name = "files_get_file_2";
+export const name = "files_get_file";
 
 export const description = "Get the content, metadata, or pdf representation of a file. It supports three operations, 'metadata', 'content', or 'pdf'. You can supply one or more operations at a time.";
 
 export const annotations = {
     readOnlyHint: true,
 }
+
+export const modes: DynamicToolMode[] = ["file", "folder", "drive", "consumerOD", "site"];
 
 export const inputSchema = {
     type: "object",
@@ -31,7 +33,9 @@ export const inputSchema = {
     required: ["drive_id", "item_id"],
 };
 
-export const handler = async function (this: MCPContext, request: CallToolRequest): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+
+    const { request } = params;
 
     const operations: string[] = <string[]>request.params.arguments.operations || ["metadata"];
 

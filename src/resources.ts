@@ -1,11 +1,10 @@
 import { readdir } from "fs/promises";
-import { DynamicResource, DynamicToolMode } from "./types.js";
+import { DynamicResource, DynamicToolMode, HandlerParams, COMMON } from "./types.js";
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
-import { ListResourcesResult, ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
+import { ListResourcesRequest, ListResourcesResult, ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
 import { MCPContext } from "./context.js";
 
-const COMMON = "common";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const resources = new Map<string, DynamicResource>();
 
@@ -15,15 +14,15 @@ export async function getResources(): Promise<Map<string, DynamicResource>> {
 
         // Load tools from the tools directory
         const dirPath = resolve(__dirname, "resources")
-        const toolFiles = await readdir(dirPath);
+        const resourceFiles = await readdir(dirPath);
 
-        for (let i = 0; i < toolFiles.length; i++) {
+        for (let i = 0; i < resourceFiles.length; i++) {
 
-            const toolFile = toolFiles[i];
+            const resourceFile = resourceFiles[i];
 
-            if (/\.js$/.test(toolFile)) {
+            if (/\.js$/.test(resourceFile)) {
 
-                resources.set(parse(toolFile).name, await import("file://" + resolve(dirPath, toolFile)));
+                resources.set(parse(resourceFile).name, await import("file://" + resolve(dirPath, resourceFile)));
             }
         }
     }
@@ -31,31 +30,35 @@ export async function getResources(): Promise<Map<string, DynamicResource>> {
     return resources;
 }
 
-export async function getResourcesHandler(this: MCPContext): Promise<ListResourcesResult> {
+export async function getResourcesHandler(this: MCPContext, params: HandlerParams<ListResourcesRequest>): Promise<ListResourcesResult> {
+
+    const { session } = params;
 
     const resources = await getResources();
 
-    const usedResourcesP: Promise<Resource[]>[] = [];
+    const activeResources: Promise<Resource[]>[] = [];
 
-    resources.forEach((value, key) => {
+    resources.forEach((resource, key) => {
 
-        if (key === COMMON || key === this.mode) {
-            usedResourcesP.push(value.publish.call(this));
+        if (key === COMMON || key === session.mode) {
+            activeResources.push(resource.publish.call(this));
         }
     });
 
-    const usedResources = (await Promise.all(usedResourcesP)).flat(2);
+    const exposedResources = (await Promise.all(activeResources)).flat(2);
 
     return {
-        resources: usedResources.map<Resource>(resource => ({
+        resources: exposedResources.map<Resource>(resource => ({
             ...resource,
         })),
     };
 }
 
-export async function readResourceHandler(this: MCPContext, request: ReadResourceRequest) {
+export async function readResourceHandler(this: MCPContext, params: HandlerParams<ReadResourceRequest>) {
 
     const resources = await getResources();
+
+    const { request } = params;
 
     const uri = new URL(request.params.uri);
     const mode = <DynamicToolMode>uri.protocol.replace(/:$/,"");

@@ -1,8 +1,8 @@
 import { readdir } from "fs/promises";
-import { DynamicResourceTemplate } from "./types.js";
+import { DynamicResourceTemplate, HandlerParams } from "./types.js";
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
-import { ListResourceTemplatesResult, ResourceTemplate } from "@modelcontextprotocol/sdk/types.js";
+import { ListResourceTemplatesRequest, ListResourceTemplatesResult, ResourceTemplate } from "@modelcontextprotocol/sdk/types.js";
 import { MCPContext } from "./context.js";
 
 const COMMON = "common";
@@ -31,7 +31,9 @@ export async function getResourceTemplates(): Promise<Map<string, DynamicResourc
     return resources;
 }
 
-export async function getResourceTemplatesHandler(this: MCPContext): Promise<ListResourceTemplatesResult> {
+export async function getResourceTemplatesHandler(this: MCPContext, params: HandlerParams<ListResourceTemplatesRequest>): Promise<ListResourceTemplatesResult> {
+
+    const { session } = params;
 
     const resources = await getResourceTemplates();
 
@@ -39,7 +41,7 @@ export async function getResourceTemplatesHandler(this: MCPContext): Promise<Lis
 
     resources.forEach((value, key) => {
 
-        if (key === COMMON || key === this.mode) {
+        if (key === COMMON || key === session.mode) {
             usedResourcesP.push(value.publish.call(this));
         }
     });

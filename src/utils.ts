@@ -1,6 +1,9 @@
 import { AudioContent, BlobResourceContents, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
 import { ValidCallToolContent, ValidCallToolResult } from "./types";
 
+// TODO: structured error response isError: true,
+
+
 export async function parseResponseToResult(response: Response): Promise<ValidCallToolResult> {
 
     if (!response.ok) {

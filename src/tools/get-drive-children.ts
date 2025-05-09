@@ -1,5 +1,5 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 import { MCPContext } from "../context.js";
 
@@ -20,7 +20,9 @@ export const inputSchema = {
     required: ["drive_id"],
 };
 
-export const handler = async function (this: MCPContext, request: CallToolRequest): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+
+    const { request } = params;
 
     return this.fetch(combine("drives", <string>request.params.arguments.drive_id, "root", "children"));
 };

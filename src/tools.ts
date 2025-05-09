@@ -1,8 +1,8 @@
 import { readdir } from "fs/promises";
-import { DynamicTool } from "./types.js";
+import { COMMON, DynamicTool, HandlerParams } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
-import { CallToolRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, ListToolsRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { formatCallToolResult } from "./utils.js";
 import { MCPContext } from "./context.js";
 
@@ -14,8 +14,8 @@ export async function getTools(): Promise<DynamicTool[]> {
     if (tools.length < 1) {
 
         // Load tools from the tools directory
-        const dirPath = resolve(__dirname, "tools")
-        const toolFiles = await readdir(dirPath, { recursive: true });
+        const dirPath = resolve(__dirname, "tools");
+        const toolFiles = await readdir(dirPath);
 
         for (let i = 0; i < toolFiles.length; i++) {
 
@@ -31,13 +31,16 @@ export async function getTools(): Promise<DynamicTool[]> {
     return tools;
 }
 
-export async function getToolsHandler(this: MCPContext): Promise<ListToolsResult> {
+export async function getToolsHandler(this: MCPContext, params: HandlerParams<ListToolsRequest>): Promise<ListToolsResult> {
+
+    const { session } = params;
 
     const tools = await getTools();
 
     return {
-        tools: tools.map(tool => (
+        tools: tools.filter(t => t.modes.includes(COMMON) || t.modes.includes(session.mode)).map(tool => (
             {
+                // include default empty input schema, required by some clients
                 inputSchema: {
                     type: "object",
                     properties: {},
@@ -48,7 +51,9 @@ export async function getToolsHandler(this: MCPContext): Promise<ListToolsResult
     };
 }
 
-export async function callToolHandler(this: MCPContext, request: CallToolRequest) {
+export async function callToolHandler(this: MCPContext, params: HandlerParams<CallToolRequest>) {
+
+    const { request } = params;
 
     const tools = await getTools();
 
@@ -59,7 +64,7 @@ export async function callToolHandler(this: MCPContext, request: CallToolRequest
             throw Error(`Could not locate tool "${request.params.name}".`);
         }
 
-        return tool[0].handler.call(this, request)
+        return tool[0].handler.call(this, params)
 
     } catch (e) {
 

@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@azure/msal-node": "^3.4.1",
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.11.0",
     "@pnp/logging": "^4.11.0",
     "express": "^5.1.0"
   }

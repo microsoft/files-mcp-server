@@ -16,7 +16,12 @@ export async function setupExpressServer(server: Server) {
 
         console.log("Received connection");
         transport = new SSEServerTransport("/message", res);
+
         await server.connect(transport);
+
+        server.notification({
+            method: "notifications/tools/list_changed"
+        })
 
         server.onclose = async () => {
             await server.close();
