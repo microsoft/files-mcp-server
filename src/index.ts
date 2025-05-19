@@ -1,6 +1,6 @@
 import { getMethodContext } from "./context.js";
-import { setupExpressServer } from "./setup-express-server-sse.js";
-// import { setupExpressServer } from "./setup-express-server-streamablehttp.js";
+// import { setupExpressServer } from "./setup-express-server-sse.js";
+import { setupExpressServer } from "./setup-express-server-streamablehttp.js";
 import { setupMCPServer } from "./setup-mcp-server.js";
 
 async function main(): Promise<void> {
