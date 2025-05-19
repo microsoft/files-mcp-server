@@ -11,7 +11,7 @@ export const annotations = {
     readOnlyHint: true,
 }
 
-export const modes: DynamicToolMode[] = ["file", "folder", "drive", "consumerOD", "site"];
+export const modes: DynamicToolMode[] = ["file"];
 
 export const inputSchema = {
     type: "object",
@@ -27,7 +27,8 @@ export const inputSchema = {
         operations: {
             type: "array",
             items: { type: "string" },
-            description: "What information we want about the file, any of metadata (default), content, or pdf. You can supply one or more operations.",
+            description: `What information we want about the file, any of metadata (default), content, contentStream, or pdf. You can supply one or more operations - except contentStream must be used alone.
+                          contentStream will return a streaming response of the file contents with appropriate content-type header.`,
         },
     },
     required: ["drive_id", "item_id"],

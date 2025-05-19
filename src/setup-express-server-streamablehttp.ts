@@ -3,14 +3,14 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import express from "express";
 import { InMemoryEventStore } from '@modelcontextprotocol/sdk/examples/shared/inMemoryEventStore.js';
 import { requireAuthentication } from "./auth.js";
-import { registerWellKnownRoutes } from "./express-routes/well-known-oauth.js";
+import { registerRoutes } from "./express-routes/index.js";
 import { randomUUID } from 'node:crypto';
 
 export async function setupExpressServer(server: Server) {
 
   const app = express();
 
-  registerWellKnownRoutes(app);
+  registerRoutes(app);
 
   const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 

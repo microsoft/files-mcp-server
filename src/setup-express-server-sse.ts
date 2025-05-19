@@ -2,7 +2,7 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import express from "express";
 import { requireAuthentication } from "./auth.js";
-import { registerWellKnownRoutes } from "./express-routes/well-known-oauth.js";
+import { registerRoutes } from "./express-routes/index.js";
 
 export async function setupExpressServer(server: Server) {
 
@@ -10,7 +10,7 @@ export async function setupExpressServer(server: Server) {
 
     const app = express();
 
-    registerWellKnownRoutes(app);
+    registerRoutes(app);
 
     app.get("/sse", requireAuthentication(async (_req, res) => {
 
@@ -19,18 +19,12 @@ export async function setupExpressServer(server: Server) {
 
         await server.connect(transport);
 
-        server.notification({
-            method: "notifications/tools/list_changed"
-        })
-
         server.onclose = async () => {
             await server.close();
         };
     }));
 
-    app.post("/message", requireAuthentication(async (req, res) => {
-        await transport.handlePostMessage(req, res);
-    }));
+    app.post("/message", requireAuthentication(async (req, res) => transport.handlePostMessage(req, res)));
 
     // just catch stuff for debugging to see if clients are calling in ways we don't handle.
     app.all(/.*/, (req, res) => {

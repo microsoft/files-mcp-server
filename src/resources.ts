@@ -8,6 +8,10 @@ import { MCPContext } from "./context.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const resources = new Map<string, DynamicResource>();
 
+export async function clearResourcesCache(): Promise<void> {
+    resources.clear();
+}
+
 export async function getResources(): Promise<Map<string, DynamicResource>> {
 
     if (resources.size < 1) {
@@ -66,9 +70,9 @@ export async function readResourceHandler(this: MCPContext, params: HandlerParam
     try {
 
         if (resources.has(mode)) {
-            return resources.get(mode).handler.call(this, request);
+            return resources.get(mode).handler.call(this, params);
         } else {
-            return resources.get(COMMON).handler.call(this, request);
+            return resources.get(COMMON).handler.call(this, params);
         }
 
     } catch (e) {

@@ -8,7 +8,8 @@
         "lib": [
             "ES2015",
             "dom",
-            "ES2017.Object"
+            "ES2017.Object",
+            "ESNext.Iterator"
         ],
         "baseUrl": ".",
         "rootDir": "./src",

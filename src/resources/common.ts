@@ -2,20 +2,17 @@
 
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
-import { ResourceReadHandlerMap } from "../types.js";
+import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
 import { processResourceHandlers } from "./process-resource-handlers.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
 
-    return [{
-        uri: "common://someid2",
-        name: "test file 2",
-        description: "this is a test resource 2, my first time publishing one.",
-        mimeType: "application/json",
-    }];
+    return [];
 }
 
-export async function handler(this: MCPContext, request: ReadResourceRequest): Promise<ReadResourceResult> {
+export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
+
+    const { request } = params;
 
     const uri = new URL(request.params.uri);
 
@@ -25,7 +22,7 @@ export async function handler(this: MCPContext, request: ReadResourceRequest): P
         return;
     }
 
-    return processResourceHandlers.call(this, uri, request, handlers);
+    return processResourceHandlers.call(this, uri, params, handlers);
 }
 
 /**
@@ -35,7 +32,7 @@ export const handlers: ResourceReadHandlerMap = new Map([
     [
         // handle any file based protocol with default handlers
         (uri) => /^common:$/i.test(uri.protocol),
-        async function (this: MCPContext, uri: URL, _request: ReadResourceRequest): Promise<Resource[]> {
+        async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
 
             const resources: Resource[] = [];
 
@@ -52,7 +49,7 @@ export const handlers: ResourceReadHandlerMap = new Map([
     [
         // handle any file based protocol with default handlers
         (uri) => /^error:$/i.test(uri.protocol),
-        async function (this: MCPContext, uri: URL, _request: ReadResourceRequest): Promise<Resource[]> {
+        async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
 
             const resources: Resource[] = [];
 
@@ -76,7 +73,14 @@ const errorMap = new Map<string, Resource>(
             "resource-not-found",
             {
                 mimeType: "text/plain",
-                text: "This error indicates we were unable to locate the resource defined by the ",
+                text: "This error indicates we were unable to locate the resource defined by the uri.",
+            }
+        ],
+        [
+            "file-map-error",
+            {
+                mimeType: "text/plain",
+                text: "This error indicates we were unable to map a file response to an appropriate resource entry.",
             }
         ]
     ])

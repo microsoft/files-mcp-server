@@ -5,7 +5,7 @@ import { combine, parseResponseToResult } from "./utils.js";
 
 export interface MCPContext {
     fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
-    fetchDirect<T>(path: string, init?: RequestInit): Promise<T>;
+    fetchDirect<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
     graphBaseUrl: string;
     graphVersionPart: string;
     getSession(): Promise<MCPSession>;
@@ -35,7 +35,7 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             return parseResponseToResult(response);
         },
-         async fetchDirect<T>(path: string, init?: RequestInit): Promise<T> {
+        async fetchDirect<T>(path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
 
             const token = await getToken(this);
 
@@ -55,7 +55,11 @@ export async function getMethodContext(): Promise<MCPContext> {
                 const txt = await response.text();
                 throw Error(`Error: ${txt}`);
             }
-            
+
+            if (returnResponse) {
+                return response;
+            }
+
             return response.json();
         },
     }

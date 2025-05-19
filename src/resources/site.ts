@@ -1,7 +1,8 @@
 // resources of a site are libraries and lists, size info
 
-import { Resource, ReadResourceResult, ReadResourceRequest } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "src/context";
+import { Resource, ReadResourceResult, ReadResourceRequest } from "@modelcontextprotocol/sdk/types.js";
+import { MCPContext } from "../context.js";
+import { HandlerParams } from "../types.js";
 
 // resource template file content : /lists/{file id}/content
 // resource template file content : /{file id}/metadata
@@ -9,15 +10,19 @@ import { MCPContext } from "src/context";
 
 export async function publish(this: MCPContext): Promise<Resource[]> {
 
-    return [{
-        uri: "site://someid",
-        name: "test file 1",
-        description: "this is a test resource, my first time publishing one.",
-        mimeType: "application/json",
-    }];
+    return [
+        {
+            uri: "files://list",
+            name: "List Files",
+            description: "Allows you to list all of the files in this site's default document library.",
+            mimeType: "application/json",
+        }
+    ];
 }
 
-export async function handler(this: MCPContext, request: ReadResourceRequest): Promise<ReadResourceResult> {
+export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
+
+    const { request } = params;
 
     const uri = new URL(request.params.uri);
 
@@ -27,7 +32,7 @@ export async function handler(this: MCPContext, request: ReadResourceRequest): P
                 uri: uri.toString(),
                 mimeType: "application/json",
                 text: JSON.stringify({
-                    test: "Hello World!",
+                    test: `Hello World! ${uri.toString}`,
                 }),
             }
         ]

@@ -1,5 +1,5 @@
 import { AudioContent, BlobResourceContents, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
-import { ValidCallToolContent, ValidCallToolResult } from "./types";
+import { GenericDeltaResponse, ValidCallToolContent, ValidCallToolResult } from "./types.js";
 
 // TODO: structured error response isError: true,
 
@@ -21,6 +21,12 @@ export async function parseResponseToResult(response: Response): Promise<ValidCa
             // Try to parse as JSON
             responseData = responseText ? JSON.parse(responseText) : {};
 
+
+
+
+
+
+
         } else {
 
             const buffer = await response.arrayBuffer();
@@ -39,7 +45,6 @@ export async function parseResponseToResult(response: Response): Promise<ValidCa
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
-
 export function formatCallToolResult(value: any, mimeType: string = "text/json"): ValidCallToolResult {
 
     let resultContent: ValidCallToolContent[] = [];
@@ -115,4 +120,28 @@ export function combine(...paths: (string | null | undefined)[]): string {
  */
 export function stringIsNullOrEmpty(s: string | undefined | null): s is undefined | null | "" {
     return typeof s === "undefined" || s === null || s.length < 1;
+}
+
+export function getNextCursor(result: GenericDeltaResponse): string | undefined {
+
+    let nextCursor;
+
+    if (result["@odata.nextLink"]) {
+
+        // we first page through this result set
+        const temp = new URL(result["@odata.nextLink"]);
+        if (temp.searchParams.has("token")) {
+            nextCursor = temp.searchParams.get("token");
+        }
+
+    } else if (result["@odata.deltaLink"]) {
+
+        // otherwise we send the token to get the next delta response
+        const temp = new URL(result["@odata.deltaLink"]);
+        if (temp.searchParams.has("token")) {
+            nextCursor = temp.searchParams.get("token");
+        }
+    }
+
+    return nextCursor;
 }

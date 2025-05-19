@@ -23,7 +23,7 @@ export async function ensureSession(sessionId: string): Promise<MCPSession> {
     const sessionCtx: MCPSession = {
         sessionId,
         currentContextRoot: "",
-        mode: "site",
+        mode: "not-set",
         props: {},
     }
 

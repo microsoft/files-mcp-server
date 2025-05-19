@@ -1,30 +1,34 @@
-import { CallToolRequest, ResourceContents, TextContent, TextResourceContents } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, TextContent, TextResourceContents } from "@modelcontextprotocol/sdk/types.js";
 import { COMMON, DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../context.js";
 import { patchSession } from "../session.js";
+import { clearToolsCache } from "../tools.js";
+import { clearResourcesCache } from "../resources.js";
 
-export const name = "files_set_mode";
+export const name = "set_context";
 
 export const modes: DynamicToolMode[] = [COMMON];
 
-export const description = "This tool allows you to change the context of the tool by providing a URL to a resource to use as the contextual entry point.";
+export const description = `This tool allows you to change the context of this mcp server by providing a URL to a resource to use as the contextual entry point.
+                            Almost any valid SharePoint or OneDrive url will work, and the tool will return an error if the context cannot be identified.
+                            The context can be a site, folder, or file. Changing the context will update the list of available tools and resources.`;
 
 export const inputSchema = {
     type: "object",
     properties: {
-        item_url: {
+        context_url: {
             type: "string",
-            description: "The url to the new contextual base.",
+            description: "The url to the new contextual root.",
         },
     },
-    required: ["item_url"],
+    required: ["context_url"],
 };
 
 export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
 
     const { request, session, server } = params;
 
-    const url = <string>request.params.arguments.item_url;
+    const url = <string>request.params.arguments.context_url;
 
     const shareKey = "u!" + Buffer.from(url, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
 
@@ -56,6 +60,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
 
         } catch {
 
+            // this is amazing error handling.
             failed = true;
         }
 
@@ -74,17 +79,28 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         }
     }
 
-    // trigger update on tools and resource with new mode
-    server.notification({
-        method: "notifications/tools/list_changed",
+    // trigger update on tools with new mode
+    clearToolsCache().then(() => {
+        server.notification({
+            method: "notifications/tools/list_changed",
+        });
+    })
+
+
+    // trigger update on resources with new mode
+    clearResourcesCache().then(() => {
+        server.notification({
+            method: "notifications/resources/list_changed",
+        });
     });
+
 
     return <ValidCallToolResult>{
         role: "user",
         content: [
             <TextContent>{
                 type: "text",
-                text: `We were able to locate the requested context using the path ${url}. It appears to be a ${mode}. We've also include some initial metadata.`,
+                text: `We located the requested context using the path '${url}', it appears to be a ${mode}. We've also include some initial metadata.`,
             },
             <TextResourceContents>{
                 uri: uriStr,

@@ -5,7 +5,7 @@ import { Application } from "express";
  * 
  * @param app the express application
  */
-export function registerWellKnownRoutes(app: Application) {
+export function registerOAuthRoutes(app: Application) {
 
     app.options("/.well-known/oauth-protected-resource", function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
@@ -43,12 +43,14 @@ export function registerWellKnownRoutes(app: Application) {
 
         const result = JSON.stringify({
 
-            
+
 
         });
 
         res.status(200).send(result);
     });
+
+    
 }
 
 // https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration response:

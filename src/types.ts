@@ -22,7 +22,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 export const COMMON = "common";
 
-export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD" | typeof COMMON;
+export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD" | typeof COMMON | "not-set";
 
 export interface DynamicTool extends Tool {
     annotations?: {
@@ -33,7 +33,7 @@ export interface DynamicTool extends Tool {
 }
 
 export interface DynamicResource {
-    publish(this: MCPContext): Promise<Resource[]>;    
+    publish(this: MCPContext): Promise<Resource[]>;
     handler(this: MCPContext, params: HandlerParams): Promise<ReadResourceResult>;
 }
 
@@ -45,33 +45,40 @@ export type ValidCallToolContent = TextContent | ImageContent | AudioContent | B
 
 export type ValidCallToolResult = CallToolResult & {
     role: "user" | "assistant",
-    content: ValidCallToolContent,
+    content: ValidCallToolContent[],
 }
 
-export type ResourceReadHandlerMap = Map<(uri: URL) => boolean, (this: MCPContext, uri: URL, request: ReadResourceRequest) => Promise<Resource[]>>;
+export type ResourceReadHandlerResult = Resource[] | {
+    resources: Resource[];
+    nextCursor: string;
+};
+
+export type ResourceReadHandler<T extends ReadResourceRequest> = (this: MCPContext, uri: URL, params: HandlerParams<T>) => Promise<ResourceReadHandlerResult>;
+
+export type ResourceReadHandlerMap<T extends ReadResourceRequest = ReadResourceRequest> = Map<(uri: URL, params: HandlerParams<T>) => boolean, ResourceReadHandler<T>>;
 
 export interface DynamicToolExtra {
-      /**
-       * An abort signal used to communicate if the request was cancelled from the sender's side.
-       */
-      signal: AbortSignal;
-      /**
-       * Information about a validated access token, provided to request handlers.
-       */
-      authInfo?: AuthInfo;
-      /**
-       * The session ID from the transport, if available.
-       */
-      sessionId?: string;
-      /**
-       * Metadata from the original request.
-       */
-      _meta?: RequestMeta;
-      /**
-       * The JSON-RPC ID of the request being handled.
-       * This can be useful for tracking or logging purposes.
-       */
-      requestId: RequestId;
+    /**
+     * An abort signal used to communicate if the request was cancelled from the sender's side.
+     */
+    signal: AbortSignal;
+    /**
+     * Information about a validated access token, provided to request handlers.
+     */
+    authInfo?: AuthInfo;
+    /**
+     * The session ID from the transport, if available.
+     */
+    sessionId?: string;
+    /**
+     * Metadata from the original request.
+     */
+    _meta?: RequestMeta;
+    /**
+     * The JSON-RPC ID of the request being handled.
+     * This can be useful for tracking or logging purposes.
+     */
+    requestId: RequestId;
 }
 
 export interface HandlerParams<RequestT extends Request = Request> {
@@ -81,5 +88,13 @@ export interface HandlerParams<RequestT extends Request = Request> {
     session: MCPSession;
 }
 
+export interface GenericDeltaResponse {
+    value: {
+        id: string,
+        [key: string]: any
+    }[];
+    "@odata.nextLink"?: string;
+    "@odata.deltaLink"?: string;
+}
 
 

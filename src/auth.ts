@@ -37,28 +37,27 @@ export function requireAuthentication(wrapped: RequestHandler): RequestHandler {
     return async (req, res) => {
 
         // TODO: Waiting for client support to test new auth flows
-        //     const unauthorizedResponse = () => {
-        //         res.set("Access-Control-Expose-Headers", "WWW-Authenticate");
-        //         res.set("WWW-Authenticate", `Bearer authorization="https://login.microsoftonline.com/common/oauth2/v2.0/authorize", resource="http://localhost:3001"`);
-        //         res.status(401).send();
+        // const unauthorizedResponse = () => {
+        //     res.set("Access-Control-Expose-Headers", "WWW-Authenticate");
+        //     res.set("WWW-Authenticate", `Bearer authorization="https://login.microsoftonline.com/common/oauth2/v2.0/authorize", resource="http://localhost:3001"`);
+        //     res.status(401).send();
+        // }
+
+        // if (req.headers.authorization) {
+
+        //     const parts = req.headers.authorization.split(" ");
+
+        //     // TODO: validate auth here
+        //     if (!/bearer/i.test(parts[0]) || parts[1] !== "123") {
+        //         unauthorizedResponse();
+        //     } else {
+        //         wrapped(req, res, null);
         //     }
+        // }
 
-        //     if (req.headers.authorization) {
+        // unauthorizedResponse();
 
-        //         const parts = req.headers.authorization.split(" ");
-
-        //         // TODO: validate auth here
-        //         if (!/bearer/i.test(parts[0]) || parts[1] !== "123") {
-        //             unauthorizedResponse();
-        //         } else {
-        //             wrapped(req, res, null);
-        //         }
-        //     }
-
-        //     unauthorizedResponse();
-        // };
-
-        wrapped(req, res, null);
+        return wrapped(req, res, null);
     }
 }
 

@@ -29,7 +29,9 @@ export async function setupMCPServer(context: MCPContext): Promise<Server> {
                 tools: {
                     listChanged: true,
                 },
-                resources: {},
+                resources: {
+                    listChanged: true,
+                },
             },
         }
     );
