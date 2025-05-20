@@ -4,7 +4,7 @@ import { MCPContext } from "../context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
-import { encodePathToBase64 } from "../utils.js";
+import { combine, encodePathToBase64 } from "../utils.js";
 
 export const name = "set_context";
 
@@ -35,55 +35,66 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
     const shareKey = "u!" + Buffer.from(url, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
 
     let result: any;
-    let failed: boolean = false;
+    let failed: boolean = true;
     let mode: DynamicToolMode;
     let contextBase = "";
     let sentResult: any = {};
 
-    try {
 
-        // let's start with file? is that more common?
-        result = await this.fetchDirect(`/shares/${shareKey}?$expand=driveItem`);
+    // these are roughly in order of our estimation on usage.
+    const resolvers = [
+        async () => {
 
-        if (result.driveItem?.root) {
-            mode = "drive";
-            contextBase = `/drives/${result.driveItem.parentReference.driveId}`;
-        } else {
-            mode = result.driveItem?.folder ? "folder" : "file";
-            contextBase = `/drives/${result.driveItem.parentReference.driveId}/items/${result.driveItem.id}`;
-        }
+            // file/folder
+            result = await this.fetchDirect(`/shares/${shareKey}?$expand=driveItem`);
 
-        sentResult = result.driveItem;
+            if (result.driveItem?.root) {
+                mode = "drive";
+                contextBase = `/drives/${result.driveItem.parentReference.driveId}`;
+            } else {
+                mode = result.driveItem?.folder ? "folder" : "file";
+                contextBase = `/drives/${result.driveItem.parentReference.driveId}/items/${result.driveItem.id}`;
+            }
 
-    } catch (e) {
-
-        try {
-
+            sentResult = result.driveItem;
+        },
+        async () => {
+            // site
             result = await this.fetchDirect(`/shares/${shareKey}?$expand=site`);
             mode = "site";
             contextBase = `/sites/${result.site.id}`;
             sentResult = result.site;
+        },
+        async () => {
+            let parsedURI = URL.parse(url)
+            // tenant root, site path, or site id
+            result = await this.fetchDirect(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
+            mode = "site";
+            contextBase = `/sites/${result.id}`;
+            sentResult = result;
 
-        } catch {
-
-            // this is amazing error handling.
-            failed = true;
         }
+    ]
 
-    } finally {
+    const resolverErrors = [];
 
-        if (!failed) {
+    for (let i = 0; i < resolvers.length; i++) {
 
+        try {
+
+            await resolvers[i]();
             await patchSession(session.sessionId, {
                 mode,
                 currentContextRoot: contextBase,
             });
+            break;
 
-        } else {
-
-            throw Error(`Could not locate a valid context using ${url}.`);
+        } catch (e) {
+            resolverErrors.push(e.message);
         }
     }
+
+    // TODO: throw/log resolver errors
 
     // trigger update on tools with new mode
     clearToolsCache().then(() => {
