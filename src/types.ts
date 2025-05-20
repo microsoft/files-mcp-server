@@ -22,7 +22,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 export const COMMON = "common";
 
-export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD" | typeof COMMON | "not-set";
+export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD" | typeof COMMON | "not-set"| "hidden";
 
 export interface DynamicTool extends Tool {
     annotations?: {
@@ -88,7 +88,7 @@ export interface HandlerParams<RequestT extends Request = Request> {
     session: MCPSession;
 }
 
-export interface GenericDeltaResponse {
+export interface GenericPagedResponse {
     value: {
         id: string,
         [key: string]: any

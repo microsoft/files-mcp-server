@@ -1,4 +1,4 @@
-import { encodeKey } from "./utils.js";
+import { encodeKey } from "./auth.js";
 
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 {{YOUR KEY HERE}}

@@ -1,5 +1,5 @@
 import { AudioContent, BlobResourceContents, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
-import { GenericDeltaResponse, ValidCallToolContent, ValidCallToolResult } from "./types.js";
+import { GenericPagedResponse, HandlerParams, ValidCallToolContent, ValidCallToolResult } from "./types.js";
 
 // TODO: structured error response isError: true,
 
@@ -20,12 +20,6 @@ export async function parseResponseToResult(response: Response): Promise<ValidCa
             const responseText = await response.text();
             // Try to parse as JSON
             responseData = responseText ? JSON.parse(responseText) : {};
-
-
-
-
-
-
 
         } else {
 
@@ -91,14 +85,6 @@ export function formatCallToolResult(value: any, mimeType: string = "text/json")
     };
 }
 
-export function encodeKey(key: string): string {
-    return Buffer.from(key).toString('base64');
-}
-
-export function decodeKey(key: string): string {
-    return Buffer.from(key, 'base64').toString('ascii');
-}
-
 /**
  * Combines an arbitrary set of paths ensuring and normalizes the slashes
  *
@@ -122,26 +108,98 @@ export function stringIsNullOrEmpty(s: string | undefined | null): s is undefine
     return typeof s === "undefined" || s === null || s.length < 1;
 }
 
-export function getNextCursor(result: GenericDeltaResponse): string | undefined {
+export function encodePathToBase64(path: string): string {
+
+    if (stringIsNullOrEmpty(path)) {
+        return path;
+    }
+
+    return Buffer.from(path).toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
+}
+
+export function decodePathFromBase64(base64: string): string {
+
+    return Buffer.from(base64.replace("-", "+").replace("_", "/").concat("="), "base64").toString("utf8");
+}
+
+export function parseNextCursor(cursor: string): string {
+    return cursor;
+}
+
+export interface GetNextCursorOptions {
+    encode: boolean;
+    includeDelta: boolean;
+}
+
+export function getNextCursor(result: GenericPagedResponse, options?: Partial<GetNextCursorOptions>): [string | undefined, boolean] {
 
     let nextCursor;
+    let isDelta = false;
+
+    const { encode, includeDelta } = {
+        encode: true,
+        includeDelta: false,
+        ...options,
+    };
 
     if (result["@odata.nextLink"]) {
 
-        // we first page through this result set
-        const temp = new URL(result["@odata.nextLink"]);
-        if (temp.searchParams.has("token")) {
-            nextCursor = temp.searchParams.get("token");
-        }
+        // we first page through this result set       
+        nextCursor = result["@odata.nextLink"];
 
-    } else if (result["@odata.deltaLink"]) {
+    } else if (includeDelta && result["@odata.deltaLink"]) {
 
+        isDelta = true;
         // otherwise we send the token to get the next delta response
-        const temp = new URL(result["@odata.deltaLink"]);
-        if (temp.searchParams.has("token")) {
-            nextCursor = temp.searchParams.get("token");
-        }
+        nextCursor = result["@odata.deltaLink"];
     }
 
-    return nextCursor;
+    if (encode) {
+        nextCursor = encodePathToBase64(nextCursor);
+    }
+
+    return [nextCursor, isDelta];
+}
+
+export interface WithProgressOptions {
+    timeout: number;
+}
+
+export async function withProgress<T>(params: HandlerParams, promise: Promise<T>, options?: WithProgressOptions) {
+
+    const { server, request } = params;
+    const progressToken = request.params._meta?.progressToken;
+    let steps = 0;
+    let clear;
+
+    const { timeout } = {
+        timeout: 5000,
+        ...options,
+    };
+
+    const progress = () => {
+
+        clear = setTimeout(async () => {
+
+            await server.notification({
+                method: "notifications/progress",
+                params: {
+                    progress: ++steps,
+                    total: steps + 1,
+                    progressToken,
+                },
+            });
+
+            progress();
+
+        }, timeout);
+    }
+
+    progress();
+
+    const result = await promise;
+
+    clearTimeout(clear);
+
+    return result;
 }

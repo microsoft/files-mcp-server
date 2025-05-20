@@ -1,10 +1,10 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { COMMON, DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../context.js";
 
 export const name = "test_long_running";
 
-export const modes: DynamicToolMode[] = [COMMON];
+export const modes: DynamicToolMode[] = ["hidden"];
 
 export const description = "A test tool for checking a long running operation";
 

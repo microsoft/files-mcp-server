@@ -1,11 +1,12 @@
 import { getToken } from "./auth.js";
 import { MCPSession } from "./session.js";
-import { ValidCallToolResult } from "./types.js";
-import { combine, parseResponseToResult } from "./utils.js";
+import { GenericPagedResponse, ValidCallToolResult } from "./types.js";
+import { combine, decodePathFromBase64, formatCallToolResult, getNextCursor, parseResponseToResult } from "./utils.js";
 
 export interface MCPContext {
     fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
     fetchDirect<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
+    fetchAndAggregate(path: string, init?: RequestInit): Promise<ValidCallToolResult>
     graphBaseUrl: string;
     graphVersionPart: string;
     getSession(): Promise<MCPSession>;
@@ -35,11 +36,32 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             return parseResponseToResult(response);
         },
+        async fetchAndAggregate(this: MCPContext, path: string, init?: RequestInit): Promise<ValidCallToolResult> {
+
+            const absPath = combine(this.graphBaseUrl, this.graphVersionPart, path);
+
+            const resultAggregate = [];
+
+            let response = await this.fetchDirect<GenericPagedResponse>(absPath);
+
+            let [nextCursor] = getNextCursor(response);
+
+            resultAggregate.push(...response.value);
+
+            while (typeof nextCursor !== "undefined") {
+
+                response = await this.fetchDirect<GenericPagedResponse>(decodePathFromBase64(nextCursor));
+                resultAggregate.push(...response.value);
+                [nextCursor] = getNextCursor(response);
+            }
+
+            return formatCallToolResult(resultAggregate, "application/json");
+        },
         async fetchDirect<T>(path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
 
             const token = await getToken(this);
 
-            const absPath = combine(this.graphBaseUrl, this.graphVersionPart, path);
+            const absPath = /https?:\/\//i.test(path) ? path : combine(this.graphBaseUrl, this.graphVersionPart, path);
 
             console.log(`FETCH PATH: ${absPath}`);
 

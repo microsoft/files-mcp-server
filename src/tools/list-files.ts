@@ -1,48 +1,34 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../context.js";
+import { combine, withProgress } from "../utils.js";
 
 export const name = "list_files";
 
 export const modes: DynamicToolMode[] = ["site", "consumerOD", "folder", "drive"];
 
-export const description = "Lists the sites in a tenant";
-
-export const inputSchema = {
-    type: "object",
-    properties: {
-        response_type: {
-            type: "string",
-            description: `Controls how the response is formatted. Valid values are 'resources' or 'json'. If 'resources' is passed the results will be resources with a uri and name. If 'json' is passed
-                          the results will be the raw API json response. The default is 'json' and it is not required to supply a value if json results are desired.`,
-        },
-    },
-    required: [],
-};
+export const description = "Lists the files in the current context. If no context is available it will use the tenant's root site's default drive.";
 
 export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    // const { session } = params;
+    const { session } = params;
 
-    // const result = this.fetchDirect("")
+    let path: string;
 
-    // site
-    // folder
-    // drive
-    // not-set
+    switch (session.mode) {
+        case "site":
+            path = combine(session.currentContextRoot, "drive/root/delta");
+            break;
+        case "consumerOD":
+            path = combine(session.currentContextRoot, "root/delta");
+            break;
+        case "folder":
+            path = combine(session.currentContextRoot, "delta");
+            break;
+        case "drive":
+            path = combine(session.currentContextRoot, "root/delta");
+            break;
+    }
 
-
-    // {
-    //   "type": "resource",
-    //   "resource": {
-    //     "uri": "resource://example",
-    //     "mimeType": "text/plain",
-    //     "text": "Resource content"
-    //   }
-    // }
-
-
-
-    // TODO: need to add next page handling
-    return this.fetch("sites/getAllSites()");
+    return withProgress(params, this.fetchAndAggregate(path));
 };

@@ -4,6 +4,7 @@ import { MCPContext } from "../context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
+import { encodePathToBase64 } from "../utils.js";
 
 export const name = "set_context";
 
@@ -11,7 +12,8 @@ export const modes: DynamicToolMode[] = [COMMON];
 
 export const description = `This tool allows you to change the context of this mcp server by providing a URL to a resource to use as the contextual entry point.
                             Almost any valid SharePoint or OneDrive url will work, and the tool will return an error if the context cannot be identified.
-                            The context can be a site, folder, or file. Changing the context will update the list of available tools and resources.`;
+                            The context can be a site, folder, or file. Changing the context will update the list of available tools and resources. Most
+                            entities include a webUrl in the response which you can use with this tool.`;
 
 export const inputSchema = {
     type: "object",
@@ -36,16 +38,21 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
     let failed: boolean = false;
     let mode: DynamicToolMode;
     let contextBase = "";
-    let uriStr = "";
     let sentResult: any = {};
 
     try {
 
         // let's start with file? is that more common?
         result = await this.fetchDirect(`/shares/${shareKey}?$expand=driveItem`);
-        mode = result?.folder ? "folder" : "file";
-        contextBase = `/drives/${1}/items/${result.driveItem.id}`;
-        uriStr = `${mode}://${result.driveItem.id}`;
+
+        if (result.driveItem?.root) {
+            mode = "drive";
+            contextBase = `/drives/${result.driveItem.parentReference.driveId}`;
+        } else {
+            mode = result.driveItem?.folder ? "folder" : "file";
+            contextBase = `/drives/${result.driveItem.parentReference.driveId}/items/${result.driveItem.id}`;
+        }
+
         sentResult = result.driveItem;
 
     } catch (e) {
@@ -55,7 +62,6 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
             result = await this.fetchDirect(`/shares/${shareKey}?$expand=site`);
             mode = "site";
             contextBase = `/sites/${result.site.id}`;
-            uriStr = `site://${result.site.id}`;
             sentResult = result.site;
 
         } catch {
@@ -94,6 +100,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         });
     });
 
+    const uriStr = `${mode}://${encodePathToBase64(contextBase)}`;
 
     return <ValidCallToolResult>{
         role: "user",
@@ -107,6 +114,10 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
                 type: "text",
                 mimeType: "application/json",
                 text: JSON.stringify(sentResult, null, 2),
+            },
+            <TextContent>{
+                type: "text",
+                text: `The uri '${uriStr}' can be used with resource templates where the uri host represents the key required for the available protocols. Keys only work with the protocol they are delivered with.`,
             },
         ],
     };

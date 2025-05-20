@@ -1,8 +1,8 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
 import { processResourceHandlers_single } from "./process-resource-handlers.js";
-import { GenericDeltaResponse, HandlerParams, ResourceReadHandlerMap, ResourceReadHandlerResult } from "../types.js";
-import { combine } from "../utils.js";
+import { GenericPagedResponse, HandlerParams, ResourceReadHandlerMap, ResourceReadHandlerResult } from "../types.js";
+import { combine, decodePathFromBase64, encodePathToBase64 } from "../utils.js";
 import { getNextCursor } from "../utils.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
@@ -52,8 +52,8 @@ const handlers: ResourceReadHandlerMap = new Map([
 
             }
 
-            const result: GenericDeltaResponse = await this.fetchDirect(requestUrl);
-            const nextCursor = getNextCursor(result);
+            const result: GenericPagedResponse = await this.fetchDirect(requestUrl);
+            const [nextCursor] = getNextCursor(result);
 
             const resources: Resource[] = result.value.map(mapFileDeltaToResource.bind(null, session.currentContextRoot));
 
@@ -98,7 +98,7 @@ interface fileDeltaResponse {
  * @param graphPath path starting with the first non-version node. /drives or /sites or /groups etc.
  */
 export function encodeFileKey(graphPath: string): string {
-    return "f!" + Buffer.from(graphPath).toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
+    return "f!" + encodePathToBase64(graphPath);
 }
 
 /**
@@ -109,15 +109,7 @@ export function decodeFileKey(fileKey: string): string {
 
     if (/^f!/i.test(fileKey)) {
 
-        // this is the _f! format we made up for testing
-        // undo the replaces in reverse order
-        const s = fileKey.replace(/^f!/i, "").replace("-", "+").replace("_", "/").concat("=");
-
-        // create a base64 buffer from that
-        const buff = Buffer.from(s, "base64");
-
-        // convert to a utf-8 string
-        return buff.toString("utf8");
+        return decodePathFromBase64(fileKey.replace(/^f!/i, ""))
     }
 
     throw Error("decodeFileKey: format not recognized.");

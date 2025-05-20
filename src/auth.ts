@@ -1,7 +1,16 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
-import { combine, decodeKey, stringIsNullOrEmpty } from "./utils.js";
+import { combine, stringIsNullOrEmpty } from "./utils.js";
 import { RequestHandler } from "express";
 import { MCPContext } from "./context.js";
+
+
+export function encodeKey(key: string): string {
+    return Buffer.from(key).toString('base64');
+}
+
+export function decodeKey(key: string): string {
+    return Buffer.from(key, 'base64').toString('ascii');
+}
 
 function safeReadEnv(name: string): string {
 
