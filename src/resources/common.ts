@@ -3,7 +3,7 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
-import { processResourceHandlers } from "./process-resource-handlers.js";
+import { processResourceHandlers } from "./core/process-resource-handlers.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
 
@@ -40,7 +40,7 @@ export const handlers: ResourceReadHandlerMap = new Map([
                 uri: uri.toString(),
                 name: uri.host,
                 mimeType: "text/plain",
-                text: "This is a common resource",
+                text: `This is a common resource with uri ${uri.toString()}`,
             });
 
             return resources;

@@ -5,11 +5,17 @@ import { fileURLToPath } from 'url';
 import { CallToolRequest, ListToolsRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { formatCallToolResult } from "./utils.js";
 import { MCPContext } from "./context.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const tools = [];
 
-export async function clearToolsCache(): Promise<void> {
+export async function clearToolsCache(server: Server): Promise<void> {
+
+    await server.notification({
+        method: "notifications/tools/list_changed",
+    });
+
     tools.length = 0;
 }
 
@@ -65,7 +71,7 @@ export async function callToolHandler(this: MCPContext, params: HandlerParams<Ca
             throw Error(`Could not locate tool "${request.params.name}".`);
         }
 
-        return tool[0].handler.call(this, params)
+        return tool[0].handler.call(this, params);
 
     } catch (e) {
 

@@ -3,6 +3,7 @@
 import { Resource, ReadResourceResult, ReadResourceRequest } from "@modelcontextprotocol/sdk/types.js";
 import { MCPContext } from "../context.js";
 import { HandlerParams } from "../types.js";
+import { decodePathFromBase64 } from "../utils.js";
 
 // resource template file content : /lists/{file id}/content
 // resource template file content : /{file id}/metadata
@@ -10,31 +11,14 @@ import { HandlerParams } from "../types.js";
 
 export async function publish(this: MCPContext): Promise<Resource[]> {
 
-    return [
-        {
-            uri: "files://list",
-            name: "List Files",
-            description: "Allows you to list all of the files in this site's default document library.",
-            mimeType: "application/json",
-        }
-    ];
+    return [];
 }
 
 export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
 
     const { request } = params;
 
-    const uri = new URL(request.params.uri);
+    const path = decodePathFromBase64(request.params.uri.replace(/site:\/\//i, ""));
 
-    return <ReadResourceResult>{
-        contents: [
-            {
-                uri: uri.toString(),
-                mimeType: "application/json",
-                text: JSON.stringify({
-                    test: `Hello World! ${uri.toString}`,
-                }),
-            }
-        ]
-    };
+    return this.fetch(path);
 }

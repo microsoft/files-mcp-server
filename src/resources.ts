@@ -4,11 +4,17 @@ import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
 import { ListResourcesRequest, ListResourcesResult, ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
 import { MCPContext } from "./context.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const resources = new Map<string, DynamicResource>();
 
-export async function clearResourcesCache(): Promise<void> {
+export async function clearResourcesCache(server: Server): Promise<void> {
+
+    await server.notification({
+        method: "notifications/resources/list_changed",
+    });
+
     resources.clear();
 }
 
@@ -65,7 +71,7 @@ export async function readResourceHandler(this: MCPContext, params: HandlerParam
     const { request } = params;
 
     const uri = new URL(request.params.uri);
-    const mode = <DynamicToolMode>uri.protocol.replace(/:$/,"");
+    const mode = <DynamicToolMode>uri.protocol.replace(/:$/, "");
 
     try {
 

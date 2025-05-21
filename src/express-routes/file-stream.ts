@@ -1,26 +1,39 @@
 import { Application } from "express";
-import { stringIsNullOrEmpty } from "../utils.js";
-import http, { IncomingMessage } from "http";
+import { combine, decodePathFromBase64, stringIsNullOrEmpty } from "../utils.js";
+import { IncomingMessage } from "http";
+import https from "https";
+import { getToken } from "../auth.js";
+import { getMethodContext } from "../context.js";
 
 export function registerFileStreamRoutes(app: Application) {
 
-// suppport direct file stream access
-    app.get(/^\/file\/contentStream\/(.+)/, (req, res) => {
+    // suppport direct file stream access
+    app.get(/^\/file\/(.*?)\/contentStream/, async (req, res) => {
 
-        const fileId = req.params[0];
+        // the key is the path, but encoded
+        const path = req.params[0];
 
-        if (stringIsNullOrEmpty(fileId)) {
+        // but first see if we have a key
+        if (stringIsNullOrEmpty(path)) {
             res.status(400).send(JSON.stringify({
-                error: "Required file id was not supplied."
+                error: "Required file key was not supplied."
             }));
+            return;
         }
 
-        // here we need to stream the file
+        // get our normal context and token
+        const context = await getMethodContext();
+        const token = await getToken(context);
 
-        // we would need to parse out the file id, as it could come from differeing scenarios (site, folder, file direct)
+        // decode the path should be a valid driveItem path
+        const decodedPath = decodePathFromBase64(path);
 
-        // TODO::
-        http.get("{GRAPH PATH TO CONTENT STREAM}", (upstreamRes: IncomingMessage) => {
+        // here we need to stream the file and hope that path is real
+        https.get(combine("https://graph.microsoft.com/v1.0", decodedPath, "contentStream"), {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }, (upstreamRes: IncomingMessage) => {
 
             // Set the same headers for the downstream client
             res.writeHead(upstreamRes.statusCode || 500, upstreamRes.headers);

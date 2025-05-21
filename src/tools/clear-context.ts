@@ -21,18 +21,10 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
     });
 
     // trigger update on tools with new mode
-    clearToolsCache().then(() => {
-        server.notification({
-            method: "notifications/tools/list_changed",
-        });
-    })
+    await clearToolsCache(server);
 
     // trigger update on resources with new mode
-    clearResourcesCache().then(() => {
-        server.notification({
-            method: "notifications/resources/list_changed",
-        });
-    });
+    await clearResourcesCache(server);
 
     return <ValidCallToolResult>{
         role: "user",

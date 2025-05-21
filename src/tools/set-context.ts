@@ -26,6 +26,12 @@ export const inputSchema = {
     required: ["context_url"],
 };
 
+interface ResolvedEntityInfo {
+    mode: DynamicToolMode;
+    contextBase: string;
+    metadata: any;
+}
+
 export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
 
     const { request, session, server } = params;
@@ -34,19 +40,14 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
 
     const shareKey = "u!" + Buffer.from(url, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
 
-    let result: any;
-    let failed: boolean = true;
-    let mode: DynamicToolMode;
-    let contextBase = "";
-    let sentResult: any = {};
-
-
     // these are roughly in order of our estimation on usage.
-    const resolvers = [
+    const resolvers: (() => Promise<ResolvedEntityInfo>)[] = [
         async () => {
 
             // file/folder
-            result = await this.fetchDirect(`/shares/${shareKey}?$expand=driveItem`);
+            const result = await this.fetchDirect<{ driveItem: { id: string, root?: any; folder?: any; parentReference: { driveId } }}>(`/shares/${shareKey}?$expand=driveItem`);
+            let mode: DynamicToolMode;
+            let contextBase: string;
 
             if (result.driveItem?.root) {
                 mode = "drive";
@@ -56,23 +57,30 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
                 contextBase = `/drives/${result.driveItem.parentReference.driveId}/items/${result.driveItem.id}`;
             }
 
-            sentResult = result.driveItem;
+            return {
+                mode,
+                contextBase,
+                metadata: result.driveItem,
+            };
         },
         async () => {
             // site
-            result = await this.fetchDirect(`/shares/${shareKey}?$expand=site`);
-            mode = "site";
-            contextBase = `/sites/${result.site.id}`;
-            sentResult = result.site;
+            const result = await this.fetchDirect<{ site: { id: string }}>(`/shares/${shareKey}?$expand=site`);
+            return {
+                mode: "site",
+                contextBase: `/sites/${result.site.id}`,
+                metadata: result.site,
+            };
         },
         async () => {
-            let parsedURI = URL.parse(url)
             // tenant root, site path, or site id
-            result = await this.fetchDirect(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
-            mode = "site";
-            contextBase = `/sites/${result.id}`;
-            sentResult = result;
-
+            let parsedURI = URL.parse(url)
+            const result = await this.fetchDirect<{ id: string }>(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
+            return {
+                mode: "site",
+                contextBase: `/sites/${result.id}`,
+                metadata: result,
+            };
         }
     ]
 
@@ -82,54 +90,44 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
 
         try {
 
-            await resolvers[i]();
+            const { mode, contextBase, metadata } = await resolvers[i]();
             await patchSession(session.sessionId, {
                 mode,
                 currentContextRoot: contextBase,
             });
-            break;
+
+            // trigger update on tools with new mode
+            await clearToolsCache(server);
+
+            // trigger update on resources with new mode
+            await clearResourcesCache(server);
+
+            const uriStr = `${mode}://${encodePathToBase64(contextBase)}`;
+
+            return <ValidCallToolResult>{
+                role: "user",
+                content: [
+                    <TextContent>{
+                        type: "text",
+                        text: `We located the requested context using the path '${url}', it appears to be a ${mode}. We've also include some initial metadata.`,
+                    },
+                    <TextResourceContents>{
+                        uri: uriStr,
+                        type: "text",
+                        mimeType: "application/json",
+                        text: JSON.stringify(metadata, null, 2),
+                    },
+                    <TextContent>{
+                        type: "text",
+                        text: `The uri '${uriStr}' can be used with resource templates where the uri host represents the key required for the available protocols. Keys only work with the protocol they are delivered with.`,
+                    },
+                ],
+            };
 
         } catch (e) {
             resolverErrors.push(e.message);
         }
     }
 
-    // TODO: throw/log resolver errors
-
-    // trigger update on tools with new mode
-    clearToolsCache().then(() => {
-        server.notification({
-            method: "notifications/tools/list_changed",
-        });
-    })
-
-
-    // trigger update on resources with new mode
-    clearResourcesCache().then(() => {
-        server.notification({
-            method: "notifications/resources/list_changed",
-        });
-    });
-
-    const uriStr = `${mode}://${encodePathToBase64(contextBase)}`;
-
-    return <ValidCallToolResult>{
-        role: "user",
-        content: [
-            <TextContent>{
-                type: "text",
-                text: `We located the requested context using the path '${url}', it appears to be a ${mode}. We've also include some initial metadata.`,
-            },
-            <TextResourceContents>{
-                uri: uriStr,
-                type: "text",
-                mimeType: "application/json",
-                text: JSON.stringify(sentResult, null, 2),
-            },
-            <TextContent>{
-                type: "text",
-                text: `The uri '${uriStr}' can be used with resource templates where the uri host represents the key required for the available protocols. Keys only work with the protocol they are delivered with.`,
-            },
-        ],
-    };
+    throw Error(resolverErrors.join("; "));
 };

@@ -1,6 +1,6 @@
 import { ReadResourceRequest, ReadResourceResult, Resource } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../context.js";
-import { HandlerParams, ResourceReadHandlerMap, ResourceReadHandlerResult } from "../types.js";
+import { MCPContext } from "../../context.js";
+import { HandlerParams, ResourceReadHandlerMap, ResourceReadHandlerResult } from "../../types.js";
 
 // this method allows multiple handlers to run and aggregates the results
 // that's a good pattern, but doesn't work well with nextCursor - or we would need a compound next cursor which seems overly complicated

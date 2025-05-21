@@ -1,9 +1,8 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
-import { processResourceHandlers } from "./process-resource-handlers.js";
+import { processResourceHandlers } from "./core/process-resource-handlers.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
-import { decodeFileKey } from "./files.js";
-import { combine } from "../utils.js";
+import { combine, decodePathFromBase64 } from "../utils.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
     // resources of a file are alt streams, formats, content, metadata, versions, size info
@@ -38,9 +37,9 @@ const handlers: ResourceReadHandlerMap = new Map([
 
             const resources: Resource[] = [];
 
-            if (/^file:\/\/f!/i.test(request.params.uri)) {
+            if (/^file:\/\//i.test(request.params.uri)) {
 
-                const path = decodeFileKey(request.params.uri.replace(/^file:\/\//i, ""));
+                const path = decodePathFromBase64(request.params.uri.replace(/^file:\/\//i, ""));
 
                 if (/\/content$/i.test(uri.pathname)) {
 
@@ -97,4 +96,3 @@ const handlers: ResourceReadHandlerMap = new Map([
         },
     ],
 ]);
-
