@@ -3,7 +3,7 @@ import { DynamicResource, DynamicToolMode, HandlerParams, COMMON } from "./types
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
 import { ListResourcesRequest, ListResourcesResult, ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

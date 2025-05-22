@@ -14,7 +14,7 @@ import {
     TextContent,
     Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 import { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { MCPSession } from "./session.js";
@@ -22,7 +22,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 export const COMMON = "common";
 
-export type DynamicToolMode = "site" | "drive" | "folder" | "file" | "consumerOD" | typeof COMMON | "not-set"| "hidden";
+export type DynamicToolMode = "site" | "library" | "folder" | "list" | "file" | "consumerOD" | typeof COMMON | "not-set"| "hidden";
 
 export interface DynamicTool extends Tool {
     annotations?: {
@@ -53,9 +53,11 @@ export type ResourceReadHandlerResult = Resource[] | {
     nextCursor: string;
 };
 
-export type ResourceReadHandler<T extends ReadResourceRequest> = (this: MCPContext, uri: URL, params: HandlerParams<T>) => Promise<ResourceReadHandlerResult>;
+export type ResourceReadHandlerTest<T extends ReadResourceRequest = ReadResourceRequest> = (uri: URL, params: HandlerParams<T>) => boolean;
 
-export type ResourceReadHandlerMap<T extends ReadResourceRequest = ReadResourceRequest> = Map<(uri: URL, params: HandlerParams<T>) => boolean, ResourceReadHandler<T>>;
+export type ResourceReadHandler<T extends ReadResourceRequest = ReadResourceRequest> = (this: MCPContext, uri: URL, params: HandlerParams<T>) => Promise<ResourceReadHandlerResult>;
+
+export type ResourceReadHandlerMap<T extends ReadResourceRequest = ReadResourceRequest> = Map<ResourceReadHandlerTest<T>, ResourceReadHandler<T>>;
 
 export interface DynamicToolExtra {
     /**

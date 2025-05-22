@@ -1,5 +1,5 @@
 import { ReadResourceRequest, ReadResourceResult, Resource } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../../context.js";
+import { MCPContext } from "../../method-context.js";
 import { HandlerParams, ResourceReadHandlerMap, ResourceReadHandlerResult } from "../../types.js";
 
 // this method allows multiple handlers to run and aggregates the results

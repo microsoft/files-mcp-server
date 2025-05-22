@@ -3,7 +3,7 @@ import { DynamicResourceTemplate, HandlerParams } from "./types.js";
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
 import { ListResourceTemplatesRequest, ListResourceTemplatesResult, ResourceTemplate } from "@modelcontextprotocol/sdk/types.js";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 
 const COMMON = "common";
 const __dirname = dirname(fileURLToPath(import.meta.url));

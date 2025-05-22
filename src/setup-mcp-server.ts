@@ -9,7 +9,7 @@ import {
     Request,
 } from "@modelcontextprotocol/sdk/types.js";
 import { callToolHandler, getToolsHandler } from "./tools.js";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 import { getResourcesHandler, readResourceHandler } from "./resources.js";
 import { getResourceTemplatesHandler } from "./resourceTemplates.js";
 import { ensureSession } from "./session.js";

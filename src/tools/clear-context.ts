@@ -1,13 +1,13 @@
 import { CallToolRequest, TextContent } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
 
 export const name = "clear_context";
 
-export const modes: DynamicToolMode[] = ["consumerOD", "drive", "file", "folder", "site"];
+export const modes: DynamicToolMode[] = ["consumerOD", "library", "file", "folder", "site"];
 
 export const description = `This tool clears the current context of the server. It can be used to reset to the root`;
 

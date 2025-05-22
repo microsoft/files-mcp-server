@@ -1,9 +1,11 @@
+import { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 import { getToken } from "./auth.js";
 import { MCPSession } from "./session.js";
 import { GenericPagedResponse, ValidCallToolResult } from "./types.js";
 import { combine, decodePathFromBase64, formatCallToolResult, getNextCursor, parseResponseToResult } from "./utils.js";
 
 export interface MCPContext {
+    fetchAndParseToResource(path: string, init?: RequestInit): Promise<ReadResourceResult>;
     fetchAndParseToResult(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
     fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
     fetchAndAggregate(path: string, init?: RequestInit): Promise<ValidCallToolResult>

@@ -4,7 +4,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
 import { CallToolRequest, ListToolsRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
 import { formatCallToolResult } from "./utils.js";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

@@ -1,9 +1,6 @@
 import { AudioContent, BlobResourceContents, ImageContent, TextContent } from "@modelcontextprotocol/sdk/types.js";
 import { GenericPagedResponse, HandlerParams, ValidCallToolContent, ValidCallToolResult } from "./types.js";
 
-// TODO: structured error response isError: true,
-
-
 export async function parseResponseToResult(response: Response): Promise<ValidCallToolResult> {
 
     if (!response.ok) {
@@ -49,6 +46,7 @@ export function formatCallToolResult(value: any, mimeType: string = "text/json")
             <TextContent>{
                 type: "text",
                 text: JSON.stringify(value, null, 2),
+                mimeType,
             });
 
     } else if (/image\//i.test(mimeType)) {

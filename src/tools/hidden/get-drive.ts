@@ -1,11 +1,11 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../../types.js";
 import { combine } from "../../utils.js";
-import { MCPContext } from "../../context.js";
+import { MCPContext } from "../../method-context.js";
 
 export const name = "files_get_drive";
 
-export const modes: DynamicToolMode[] = ["drive"];
+export const modes: DynamicToolMode[] = ["library"];
 
 export const description = "Get the details about a single Drive by id";
 

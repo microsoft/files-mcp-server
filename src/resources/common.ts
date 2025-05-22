@@ -1,5 +1,5 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
 

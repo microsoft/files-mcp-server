@@ -1,9 +1,10 @@
 // resources of a folder are files, size info
 
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../context.js";
-import { HandlerParams } from "../types.js";
-import { decodePathFromBase64 } from "../utils.js";
+import { MCPContext } from "../method-context.js";
+import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
+import { processResourceHandlers } from "./core/process-resource-handlers.js";
+import { getDefaultResourceHandlerFor } from "./core/default-resource-handler.js";
 
 export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
 
@@ -14,7 +15,21 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
 
     const { request } = params;
 
-    const path = decodePathFromBase64(request.params.uri.replace(/folder:\/\//i, ""));
+    const uri = new URL(request.params.uri);
 
-    return this.fetchAndParseToResult(path);
+    if (!/^folder:$/i.test(uri.protocol)) {
+        // filter by all the protocols this handler can accept
+        // this was misrouted, maybe something elese will pick it up
+        return;
+    }
+
+    return processResourceHandlers.call(this, uri, params, handlers);
 }
+
+
+/**
+ * This is a map of [function, handler] tuples. If the function returns true, the handler is used.
+ */
+const handlers: ResourceReadHandlerMap = new Map([
+    getDefaultResourceHandlerFor("folder"),
+]);

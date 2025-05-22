@@ -1,6 +1,6 @@
 import { CallToolRequest, TextContent, TextResourceContents } from "@modelcontextprotocol/sdk/types.js";
 import { COMMON, DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
@@ -45,12 +45,12 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         async () => {
 
             // file/folder
-            const result = await this.fetch<{ driveItem: { id: string, root?: any; folder?: any; parentReference: { driveId } }}>(`/shares/${shareKey}?$expand=driveItem`);
+            const result = await this.fetch<{ driveItem: { id: string, root?: any; folder?: any; parentReference: { driveId } } }>(`/shares/${shareKey}?$expand=driveItem`);
             let mode: DynamicToolMode;
             let contextBase: string;
 
             if (result.driveItem?.root) {
-                mode = "drive";
+                mode = "library";
                 contextBase = `/drives/${result.driveItem.parentReference.driveId}`;
             } else {
                 mode = result.driveItem?.folder ? "folder" : "file";
@@ -64,8 +64,17 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
             };
         },
         async () => {
+            // list
+            const result = await this.fetch<{ list: { id: string, parentReference: { siteId: string } } }>(`/shares/${shareKey}?$expand=list`);
+            return {
+                mode: "list",
+                contextBase: `/sites/${result.list.parentReference.siteId}/lists/${result.list.id}`,
+                metadata: result.list,
+            };
+        },
+        async () => {
             // site
-            const result = await this.fetch<{ site: { id: string }}>(`/shares/${shareKey}?$expand=site`);
+            const result = await this.fetch<{ site: { id: string } }>(`/shares/${shareKey}?$expand=site`);
             return {
                 mode: "site",
                 contextBase: `/sites/${result.site.id}`,

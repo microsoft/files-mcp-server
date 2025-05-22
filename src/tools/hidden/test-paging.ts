@@ -1,6 +1,6 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, GenericPagedResponse, HandlerParams, ValidCallToolResult } from "../../types.js";
-import { MCPContext } from "../../context.js";
+import { MCPContext } from "../../method-context.js";
 import { getNextCursor } from "../../utils.js";
 
 // Paging doesn't seem supported for tool results as of May 14

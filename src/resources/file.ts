@@ -1,9 +1,10 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
 import { combine, decodePathFromBase64, encodePathToBase64 } from "../utils.js";
 import { mapDriveItemResponseToResource } from "./core/utils.js";
+import { getDefaultResourceHandlerFor } from "./core/default-resource-handler.js";
 
 export async function publish(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<(Resource | ResourceTemplate)[]> {
 
@@ -83,70 +84,40 @@ const handlers: ResourceReadHandlerMap = new Map([
         }
     ],
     [
-        // handle any file based protocol with default handlers
-        (uri) => /^file:$/i.test(uri.protocol),
+        (uri) => /^file:\/\/.*?\/content$/i.test(uri.toString()),
         async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
 
             const { request } = params;
+            const encodedPath = /^file:\/\/(.*?)\/content$/.exec(request.params.uri);
+            const path = decodePathFromBase64(encodedPath[1]);
 
-            const resources: Resource[] = [];
+            const result = await this.fetch<Response>(combine(path, "contentStream"), <any>{
+                responseType: "arraybuffer",
+            }, true);
 
-            if (/^file:\/\//i.test(request.params.uri)) {
+            const mimeType = result.headers.get("Content-Type");
 
-                const path = decodePathFromBase64(request.params.uri.replace(/^file:\/\//i, ""));
+            if (mimeType === "text/plain") {
 
-                if (/\/content$/i.test(uri.pathname)) {
+                const text = await result.text();
 
-                    const result = await this.fetch<Response>(combine(path, "contentStream"), <any>{
-                        responseType: "arraybuffer",
-                    }, true);
-
-
-                    const mimeType = result.headers.get("Content-Type");
-
-                    if (mimeType === "text/plain") {
-
-                        const text = await result.text();
-
-                        resources.push({
-                            uri: request.params.uri,
-                            mimeType,
-                            text,
-                        });
-
-                    } else {
-
-                        const buffer = await result.arrayBuffer();
-
-                        resources.push({
-                            uri: request.params.uri,
-                            mimeType: mimeType || "application/octet-stream",
-                            blob: Buffer.from(buffer).toString("base64"),
-                        });
-                    }
-
-                } else {
-
-                    const result = await this.fetch<Response>(path);
-
-                    resources.push({
-                        uri: request.params.uri,
-                        mimeType: "application/json",
-                        text: JSON.stringify(result, null, 2),
-                    });
-                }
-            }
-
-            if (resources.length < 1) {
-
-                resources.push({
+                return [{
                     uri: request.params.uri,
-                    text: `Could not read file ${uri.host}`,
-                    isError: true,
-                });
-            }
+                    mimeType,
+                    text,
+                }];
 
-            return resources;
-        },
+            } else {
+
+                const buffer = await result.arrayBuffer();
+
+                return [{
+                    uri: request.params.uri,
+                    mimeType: mimeType || "application/octet-stream",
+                    blob: Buffer.from(buffer).toString("base64"),
+                }];
+            }
+        }
     ],
+    getDefaultResourceHandlerFor("file"),
 ]);

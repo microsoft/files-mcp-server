@@ -9,8 +9,8 @@ export function registerOAuthRoutes(app: Application) {
 
     app.options("/.well-known/oauth-protected-resource", function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+        res.header("Access-Control-Allow-Methods", "GET,OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Authorization");
         res.send(200);
     });
 
@@ -30,27 +30,7 @@ export function registerOAuthRoutes(app: Application) {
         });
 
         res.status(200).send(result);
-    });
-
-    app.options("/.well-known/oauth-authorization-server", function (req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-        res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
-        res.send(200);
-    });
-
-    app.get("/.well-known/oauth-authorization-server", (_req, res) => {
-
-        const result = JSON.stringify({
-
-
-
-        });
-
-        res.status(200).send(result);
-    });
-
-    
+    });    
 }
 
 // https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration response:

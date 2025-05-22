@@ -1,7 +1,7 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 
 export const name = "get_file";
 
@@ -11,7 +11,7 @@ export const annotations = {
     readOnlyHint: true,
 }
 
-export const modes: DynamicToolMode[] = ["file", "folder", "drive", "site"];
+export const modes: DynamicToolMode[] = ["file", "folder", "library", "site"];
 
 export const inputSchema = {
     type: "object",
@@ -31,7 +31,7 @@ export const inputSchema = {
         },
         address_direct: {
             type: "boolean",
-            description: "Optional, if set to true and a drive_id and item_id are supplied any mode checks will be skipped and the file will be addressed directly."
+            description: "Optional, if set to true and a drive_id and item_id are supplied any context checks will be skipped and the file will be addressed directly."
         }
     },
     required: ["drive_id", "item_id"],
@@ -56,7 +56,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         case "folder":
             path = combine(session.currentContextRoot, "items", <string>request.params.arguments.item_id);
             break;
-        case "drive":
+        case "library":
             path = combine(session.currentContextRoot, "items", <string>request.params.arguments.item_id);
             break;
         default:

@@ -1,6 +1,6 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../../types.js";
-import { MCPContext } from "../../context.js";
+import { MCPContext } from "../../method-context.js";
 
 export const name = "test_long_running";
 

@@ -1,5 +1,5 @@
 import { ListResourceTemplatesRequest, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "../context.js";
+import { MCPContext } from "../method-context.js";
 import { HandlerParams } from "../types.js";
 
 export async function publish(this: MCPContext, params: HandlerParams<ListResourceTemplatesRequest>): Promise<ResourceTemplate[]> {
@@ -13,36 +13,37 @@ export async function publish(this: MCPContext, params: HandlerParams<ListResour
         },
         {
             uriTemplate: "file://{file-key}",
-            name: "Gets a file's metadata by its id",
-            description: "Allows you to reference a site entity by id, replacing {site-id} with a valid site id. You can get a listing of site ids from ",
+            name: "Gets a file's metadata by its key",
+            description: "Allows you to reference a site entity by key, replacing {site-key} with a valid file key. You can get a listing of file keys by listing the file resources in a library",
         },
         {
-            uriTemplate: "file://{file-key}/content",
-            name: "Gets a file's content by its id",
-            description: "Allows you to reference a site entity by id, replacing {site-id} with a valid site id. You can get a listing of site ids from ",
+            uriTemplate: "folder://{folder-key}",
+            name: "Gets a folder's metadata by its key",
+            description: "Allows you to reference a folder entity by key, replacing {folder-key} with a valid sitekey.",
         },
                 {
-            uriTemplate: "folder://{folder-key}",
-            name: "Gets a file's metadata by its id",
-            description: "Allows you to reference a site entity by id, replacing {site-id} with a valid site id. You can get a listing of site ids from ",
-        },
-        {
-            uriTemplate: "folder://{folder-key}/files",
-            name: "Gets a folder's content by its id",
-            description: "Allows you to reference a site entity by id, replacing {site-id} with a valid site id. You can get a listing of site ids from ",
+            uriTemplate: "library://{library-key}",
+            name: "Gets a library's metadata by its key",
+            description: "Allows you to reference a library entity by key, replacing {library-key} with a valid sitekey.",
         },
         {
             uriTemplate: "site://{site-key}",
-            name: "Gets a site by its id",
-            description: "Allows you to reference a site entity by id, replacing {site-id} with a valid site id. You can get a listing of site ids from ",
+            name: "Gets a site by its key",
+            description: "Allows you to reference a site entity by key, replacing {site-key} with a valid site key.",
             mimeType: "application/json",
         },
         {
-            uriTemplate: "site://{site-key}/files",
-            name: "Gets a listing of all the files in this site's default document library. If the currect mode is 'site' use the current context url as the site id, or leave out the id.",
-            description: "Allows you to reference file resources and the available options they expose.",
+            uriTemplate: "list://{list-key}",
+            name: "Gets a list by its key",
+            description: "Allows you to reference a site entity bykey, replacing {list-key} with a valid site key.",
             mimeType: "application/json",
-        }
+        },
+        {
+            uriTemplate: "listitem://{listitem-key}",
+            name: "Gets a list item by its key",
+            description: "Allows you to reference a site entity bykey, replacing {site-key} with a valid sitekey.",
+            mimeType: "application/json",
+        },
     ];
 }
 

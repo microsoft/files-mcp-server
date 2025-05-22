@@ -3,7 +3,7 @@ import { combine, decodePathFromBase64, stringIsNullOrEmpty } from "../utils.js"
 import { IncomingMessage } from "http";
 import https from "https";
 import { getToken } from "../auth.js";
-import { getMethodContext } from "../context.js";
+import { getMethodContext } from "../method-context.js";
 
 export function registerFileStreamRoutes(app: Application) {
 

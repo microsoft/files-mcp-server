@@ -1,7 +1,7 @@
 import { ConfidentialClientApplication } from "@azure/msal-node";
 import { combine, stringIsNullOrEmpty } from "./utils.js";
 import { RequestHandler } from "express";
-import { MCPContext } from "./context.js";
+import { MCPContext } from "./method-context.js";
 
 
 export function encodeKey(key: string): string {
