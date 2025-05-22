@@ -1,9 +1,8 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, GenericPagedResponse, HandlerParams, ValidCallToolResult } from "../types.js";
-import { MCPContext } from "../context.js";
-import { getNextCursor } from "../utils.js";
+import { DynamicToolMode, GenericPagedResponse, HandlerParams, ValidCallToolResult } from "../../types.js";
+import { MCPContext } from "../../context.js";
+import { getNextCursor } from "../../utils.js";
 
-///
 // Paging doesn't seem supported for tool results as of May 14
 export const name = "test_paging";
 
@@ -41,7 +40,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         urlBase += `?$top=${pageSize}`;
     }
 
-    const result = await this.fetchDirect<GenericPagedResponse>(urlBase);
+    const result = await this.fetch<GenericPagedResponse>(urlBase);
 
     const results = result.value;
     const nextCursor = getNextCursor(result);

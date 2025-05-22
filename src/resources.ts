@@ -20,11 +20,13 @@ export async function clearResourcesCache(server: Server): Promise<void> {
 
 export async function getResources(): Promise<Map<string, DynamicResource>> {
 
+    resources.clear();
+
     if (resources.size < 1) {
 
         // Load tools from the tools directory
         const dirPath = resolve(__dirname, "resources")
-        const resourceFiles = await readdir(dirPath);
+        const resourceFiles = await readdir(dirPath, { recursive: false });
 
         for (let i = 0; i < resourceFiles.length; i++) {
 
@@ -48,12 +50,11 @@ export async function getResourcesHandler(this: MCPContext, params: HandlerParam
 
     const activeResources: Promise<Resource[]>[] = [];
 
-    resources.forEach((resource, key) => {
-
+    for (let [key, resource] of resources) {
         if (key === COMMON || key === session.mode) {
-            activeResources.push(resource.publish.call(this));
+            activeResources.push(resource.publish.call(this, params));
         }
-    });
+    }
 
     const exposedResources = (await Promise.all(activeResources)).flat(2);
 

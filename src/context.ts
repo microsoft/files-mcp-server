@@ -4,8 +4,8 @@ import { GenericPagedResponse, ValidCallToolResult } from "./types.js";
 import { combine, decodePathFromBase64, formatCallToolResult, getNextCursor, parseResponseToResult } from "./utils.js";
 
 export interface MCPContext {
-    fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
-    fetchDirect<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
+    fetchAndParseToResult(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
+    fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
     fetchAndAggregate(path: string, init?: RequestInit): Promise<ValidCallToolResult>
     graphBaseUrl: string;
     graphVersionPart: string;
@@ -18,7 +18,7 @@ export async function getMethodContext(): Promise<MCPContext> {
     return <MCPContext>{
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
-        async fetch(path: string, init?: RequestInit): Promise<ValidCallToolResult> {
+        async fetchAndParseToResult(path: string, init?: RequestInit): Promise<ValidCallToolResult> {
 
             const token = await getToken(this);
 
@@ -42,7 +42,7 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             const resultAggregate = [];
 
-            let response = await this.fetchDirect<GenericPagedResponse>(absPath);
+            let response = await this.fetch<GenericPagedResponse>(absPath);
 
             let [nextCursor] = getNextCursor(response);
 
@@ -50,14 +50,14 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             while (typeof nextCursor !== "undefined") {
 
-                response = await this.fetchDirect<GenericPagedResponse>(decodePathFromBase64(nextCursor));
+                response = await this.fetch<GenericPagedResponse>(decodePathFromBase64(nextCursor));
                 resultAggregate.push(...response.value);
                 [nextCursor] = getNextCursor(response);
             }
 
             return formatCallToolResult(resultAggregate, "application/json");
         },
-        async fetchDirect<T>(path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
+        async fetch<T>(path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
 
             const token = await getToken(this);
 

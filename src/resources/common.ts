@@ -1,5 +1,3 @@
-// common resources are parent ref
-
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
@@ -28,7 +26,7 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
 /**
  * This is a map of [function, handler] tuples. If the function returns true, the handler is used. Multiple can apply
  */
-export const handlers: ResourceReadHandlerMap = new Map([
+const handlers: ResourceReadHandlerMap = new Map([
     [
         // handle any file based protocol with default handlers
         (uri) => /^common:$/i.test(uri.protocol),

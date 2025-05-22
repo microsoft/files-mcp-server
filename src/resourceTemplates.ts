@@ -39,12 +39,11 @@ export async function getResourceTemplatesHandler(this: MCPContext, params: Hand
 
     const usedResourcesP: Promise<DynamicResourceTemplate[]>[] = [];
 
-    resources.forEach((value, key) => {
-
-        if (key === COMMON || key === session.mode) {
-            usedResourcesP.push(value.publish.call(this));
+    for (let [key, resource] of resources) {
+         if (key === COMMON || key === session.mode) {
+            usedResourcesP.push(resource.publish.call(this, params));
         }
-    });
+    }
 
     const usedResources = (await Promise.all(usedResourcesP)).flat(2);
 

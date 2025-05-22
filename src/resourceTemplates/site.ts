@@ -1,13 +1,8 @@
-// resources of a site are libraries and lists, size info
+import { ListResourceTemplatesRequest, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
+import { MCPContext } from "../context.js";
+import { HandlerParams } from "../types.js";
 
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/types";
-import { MCPContext } from "src/context";
-
-// resource template file content : /lists/{file id}/content
-// resource template file content : /{file id}/metadata
-// resource template file content : /{file id}/formats/pdf
-
-export async function publish(this: MCPContext): Promise<ResourceTemplate[]> {
+export async function publish(this: MCPContext, params: HandlerParams<ListResourceTemplatesRequest>): Promise<ResourceTemplate[]> {
 
     return <ResourceTemplate[]>[];
 }

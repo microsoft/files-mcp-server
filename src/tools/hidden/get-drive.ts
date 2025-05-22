@@ -1,7 +1,7 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
-import { combine } from "../utils.js";
-import { MCPContext } from "../context.js";
+import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../../types.js";
+import { combine } from "../../utils.js";
+import { MCPContext } from "../../context.js";
 
 export const name = "files_get_drive";
 
@@ -24,5 +24,5 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
 
     const { request } = params;
 
-    return this.fetch(combine("drives", <string>request.params.arguments.drive_id));
+    return this.fetchAndParseToResult(combine("drives", <string>request.params.arguments.drive_id));
 };

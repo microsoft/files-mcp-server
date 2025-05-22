@@ -1,11 +1,33 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../context.js";
 import { HandlerParams } from "../types.js";
-import { decodePathFromBase64 } from "../utils.js";
+import { combine, decodePathFromBase64 } from "../utils.js";
+import { mapDriveItemResponseToResource } from "./core/utils.js";
 
-export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
+export async function publish(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<(Resource | ResourceTemplate)[]> {
 
-    return [];
+    const { session } = params;
+
+    const resources = [];
+
+    // add recent files in context of drives
+    if (session.mode === "consumerOD" || session.mode === "drive") {
+
+        // in the context of a drive, we can list all the files as resources - which will take a bit.
+        // so instead what if we list the most recent files in that drive?
+        try {
+            const recentFiles = await this.fetch<any[]>(combine(session.currentContextRoot, "recent"));
+
+            resources.push(...recentFiles.map(mapDriveItemResponseToResource));
+
+        } catch (e) {
+
+            // this only works for delegated so for now it will just fail
+            console.error(e);
+        }
+    }
+
+    return resources;
 }
 
 export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
@@ -14,43 +36,5 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
 
     const path = decodePathFromBase64(request.params.uri.replace(/drive:\/\//i, ""));
 
-    return this.fetch(path);
+    return this.fetchAndParseToResult(path);
 }
-
-
-
-// resources of a drive are files, size info
-
-
-// resource for listing all files /files
-// resource template file content : /{file id}/content
-// resource template file content : /{file id}/metadata
-// resource template file content : /{file id}/formats/pdf
-// resource template file content : /folders
-
-
-
-
-
-
-
-
-
-
-
-
-
-// {
-//     uri: string;           // Unique identifier for the resource
-//     name: string;          // Human-readable name
-//     description?: string;  // Optional description
-//     mimeType?: string;     // Optional MIME type
-//   }
-
-
-// {
-//     uriTemplate: string;   // URI template following RFC 6570 (https://www.rfc-editor.org/rfc/rfc6570)
-//     name: string;          // Human-readable name for this type
-//     description?: string;  // Optional description
-//     mimeType?: string;     // Optional MIME type for all matching resources
-//   }

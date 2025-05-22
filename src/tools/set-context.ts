@@ -45,7 +45,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         async () => {
 
             // file/folder
-            const result = await this.fetchDirect<{ driveItem: { id: string, root?: any; folder?: any; parentReference: { driveId } }}>(`/shares/${shareKey}?$expand=driveItem`);
+            const result = await this.fetch<{ driveItem: { id: string, root?: any; folder?: any; parentReference: { driveId } }}>(`/shares/${shareKey}?$expand=driveItem`);
             let mode: DynamicToolMode;
             let contextBase: string;
 
@@ -65,7 +65,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         },
         async () => {
             // site
-            const result = await this.fetchDirect<{ site: { id: string }}>(`/shares/${shareKey}?$expand=site`);
+            const result = await this.fetch<{ site: { id: string }}>(`/shares/${shareKey}?$expand=site`);
             return {
                 mode: "site",
                 contextBase: `/sites/${result.site.id}`,
@@ -75,7 +75,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         async () => {
             // tenant root, site path, or site id
             let parsedURI = URL.parse(url)
-            const result = await this.fetchDirect<{ id: string }>(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
+            const result = await this.fetch<{ id: string }>(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
             return {
                 mode: "site",
                 contextBase: `/sites/${result.id}`,

@@ -14,6 +14,6 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
 
     const path = decodePathFromBase64(request.params.uri.replace(/list:\/\//i, ""));
 
-    return this.fetch(path);
+    return this.fetchAndParseToResult(path);
 }
 

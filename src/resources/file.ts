@@ -2,11 +2,46 @@ import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } f
 import { MCPContext } from "../context.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
-import { combine, decodePathFromBase64 } from "../utils.js";
+import { combine, decodePathFromBase64, encodePathToBase64 } from "../utils.js";
+import { mapDriveItemResponseToResource } from "./core/utils.js";
 
-export async function publish(this: MCPContext): Promise<(Resource | ResourceTemplate)[]> {
-    // resources of a file are alt streams, formats, content, metadata, versions, size info
-    return [];
+export async function publish(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<(Resource | ResourceTemplate)[]> {
+
+    const { session } = params;
+
+    // for file let's just grab some things and create resoureces so they are available
+
+    const resources: Resource[] = [];
+
+    // include metadata
+    if (session.mode === "file") {
+
+        //TODO:: eventually we'd cache this
+        const metadata = await this.fetch<any>(combine(session.currentContextRoot));
+        const resource = mapDriveItemResponseToResource(metadata);
+        const key = encodePathToBase64(session.currentContextRoot);
+
+        resources.push(
+            // expose metadata resource of file
+            resource,
+
+            // expose botspeak representation of file
+            {
+                uri: combine(resource.uri, "botspeak"),
+                name: `Botspeak representation of ${resource.name}`,
+                mimeType: "text/plain",
+            },
+
+            // expose direct download
+            {
+                uri: combine("/", "file", key, "contentStream"),
+                name: `Directly download the content of the file: ${resource.name}`,
+                description: "This resources represents a direct download of the file. To access it do not sent a resource request, instead make a request using the supplied path to the server. You should include authentication information as normal.",
+                mimeType: resource.mimeType,
+            });
+    }
+
+    return resources;
 }
 
 export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
@@ -29,6 +64,25 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
  */
 const handlers: ResourceReadHandlerMap = new Map([
     [
+        (uri) => /^file:\/\/.*?\/botspeak$/i.test(uri.toString()),
+        async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
+
+            const { request } = params;
+            const encodedPath = /^file:\/\/(.*?)\/botspeak$/.exec(request.params.uri);
+            const path = decodePathFromBase64(encodedPath[1]);
+
+            const botspeakResponse = await this.fetch<Response>(combine(path, "content?format=botspeak"), {}, true);
+
+            const text = await botspeakResponse.text();
+
+            return [{
+                uri: request.params.uri,
+                mimeType: botspeakResponse.headers.get("Content-Type"),
+                text,
+            }];
+        }
+    ],
+    [
         // handle any file based protocol with default handlers
         (uri) => /^file:$/i.test(uri.protocol),
         async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
@@ -43,7 +97,7 @@ const handlers: ResourceReadHandlerMap = new Map([
 
                 if (/\/content$/i.test(uri.pathname)) {
 
-                    const result = await this.fetchDirect<Response>(combine(path, "contentStream"), <any>{
+                    const result = await this.fetch<Response>(combine(path, "contentStream"), <any>{
                         responseType: "arraybuffer",
                     }, true);
 
@@ -73,7 +127,7 @@ const handlers: ResourceReadHandlerMap = new Map([
 
                 } else {
 
-                    const result = await this.fetchDirect<Response>(path);
+                    const result = await this.fetch<Response>(path);
 
                     resources.push({
                         uri: request.params.uri,

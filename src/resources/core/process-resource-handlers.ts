@@ -8,11 +8,13 @@ export async function processResourceHandlers<T extends ReadResourceRequest = Re
 
     const resourcePromises: Promise<Resource[]>[] = [];
 
-    handlers.forEach((func, key) => {
-        if (key(uri, params)) {
+    for (let [test, func] of handlers) {
+
+        if (test(uri, params)) {
             resourcePromises.push(func.call(this, uri, params));
+            break;
         }
-    });
+    }
 
     const resources = (await Promise.all(resourcePromises)).flat();
 
@@ -42,14 +44,14 @@ export async function processResourceHandlers_single<T extends ReadResourceReque
         const result: ResourceReadHandlerResult = await handler[1].call(this, uri, params);
 
         if (Array.isArray(result)) {
-            
+
             return <ReadResourceResult>{
                 uri: uri.toString(),
                 contents: result,
             };
 
         } else {
-            
+
             return <ReadResourceResult>{
                 uri: uri.toString(),
                 contents: result.resources,

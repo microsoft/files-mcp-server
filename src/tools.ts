@@ -25,7 +25,7 @@ export async function getTools(): Promise<DynamicTool[]> {
 
         // Load tools from the tools directory
         const dirPath = resolve(__dirname, "tools");
-        const allFiles = await readdir(dirPath);
+        const allFiles = await readdir(dirPath, { recursive: false });
         const toolFiles = allFiles.filter(f => /\.js$/.test(f))
 
         for (let i = 0; i < toolFiles.length; i++) {
