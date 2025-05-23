@@ -1,4 +1,4 @@
-import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 import { MCPContext } from "../method-context.js";
@@ -6,11 +6,12 @@ import { parseResponseToResult } from "./core/utils.js";
 
 export const name = "get_file";
 
-export const description = "Get the content, metadata, or pdf representation of a file. It supports three operations, 'metadata', 'content', or 'pdf'. You can supply one or more operations at a time.";
-
-export const annotations = {
+export const annotations: ToolAnnotations = {
+    title: "Get File Content and Info",
     readOnlyHint: true,
-}
+};
+
+export const description = "Get the content, metadata, or pdf representation of a file. It supports three operations, 'metadata', 'content', or 'pdf'. You can supply one or more operations at a time.";
 
 export const modes: DynamicToolMode[] = ["file", "folder", "library", "site"];
 

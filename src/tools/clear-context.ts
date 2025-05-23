@@ -1,4 +1,4 @@
-import { CallToolRequest, TextContent } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, TextContent, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
@@ -6,6 +6,10 @@ import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
 
 export const name = "clear_context";
+
+export const annotations: ToolAnnotations = {
+    title: "Clear Context",
+};
 
 export const modes: DynamicToolMode[] = ["consumerOD", "library", "file", "folder", "site"];
 

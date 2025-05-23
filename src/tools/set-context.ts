@@ -1,4 +1,4 @@
-import { CallToolRequest, TextContent, TextResourceContents } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, TextContent, TextResourceContents, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { COMMON, DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
@@ -7,6 +7,10 @@ import { clearResourcesCache } from "../resources.js";
 import { combine, decodePathFromBase64, encodePathToBase64 } from "../utils.js";
 
 export const name = "set_context";
+
+export const annotations: ToolAnnotations = {
+    title: "Set Context",
+};
 
 export const modes: DynamicToolMode[] = [COMMON];
 

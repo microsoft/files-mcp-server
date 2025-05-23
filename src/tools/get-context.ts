@@ -1,8 +1,13 @@
-import { CallToolRequest, TextContent } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, TextContent, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 
 export const name = "get_context";
+
+export const annotations: ToolAnnotations = {
+    title: "Get Context",
+    readOnlyHint: true,
+};
 
 export const modes: DynamicToolMode[] = ["consumerOD", "library", "file", "folder", "site"];
 

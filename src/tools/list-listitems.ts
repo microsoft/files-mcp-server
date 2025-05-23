@@ -1,10 +1,15 @@
-import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { combine, withProgress } from "../utils.js";
 import { formatCallToolResult } from "./core/utils.js";
 
 export const name = "list_listitems";
+
+export const annotations: ToolAnnotations = {
+    title: "List ListItems",
+    readOnlyHint: true,
+};
 
 //TODO:: test consumer OD lists
 export const modes: DynamicToolMode[] = ["list", "folder", "library"];
