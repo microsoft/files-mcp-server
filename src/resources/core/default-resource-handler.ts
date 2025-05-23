@@ -3,12 +3,10 @@ import { DynamicToolMode, HandlerParams, ResourceReadHandler, ResourceReadHandle
 import { ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
 import { decodePathFromBase64 } from "../../utils.js";
 
-export function getDefaultResourceHandlerFor(protocol: Exclude<DynamicToolMode, "not-set" | "hidden" | "common" | "consumerOD">): [ResourceReadHandlerTest, ResourceReadHandler] {
+export function getDefaultResourceHandlerMapEntryFor(protocol: Exclude<DynamicToolMode, "not-set" | "hidden" | "common" | "consumerOD">): [ResourceReadHandlerTest, ResourceReadHandler] {
 
     return [
-        (uri) => {
-            return RegExp(`^${protocol}:`, "i").test(uri.protocol)
-        },
+        (uri) => RegExp(`^${protocol}:`, "i").test(uri.protocol),
         async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
 
             const { request } = params;

@@ -4,7 +4,7 @@ import { Resource, ReadResourceResult, ReadResourceRequest } from "@modelcontext
 import { MCPContext } from "../method-context.js";
 import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
-import { getDefaultResourceHandlerFor } from "./core/default-resource-handler.js";
+import { getDefaultResourceHandlerMapEntryFor } from "./core/default-resource-handler.js";
 
 // resource template file content : /lists/{file id}/content
 // resource template file content : /{file id}/metadata
@@ -35,5 +35,5 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
  * This is a map of [function, handler] tuples. If the function returns true, the handler is used.
  */
 const handlers: ResourceReadHandlerMap = new Map([
-    getDefaultResourceHandlerFor("site"),
+    getDefaultResourceHandlerMapEntryFor("site"),
 ]);

@@ -13,17 +13,15 @@ export interface MCPContext {
 
 export async function getMethodContext(): Promise<MCPContext> {
 
-    // context passed to all tools
+    // context passed to all tool/resource handlers
     return <MCPContext>{
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
         async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit): Promise<T[]> {
 
-            const absPath = /https?:\/\//i.test(path) ? path : combine(this.graphBaseUrl, this.graphVersionPart, path);
-
             const resultAggregate = [];
 
-            let response = await this.fetch<GenericPagedResponse>(absPath, init);
+            let response = await this.fetch<GenericPagedResponse>(path, init);
 
             let [nextCursor] = getNextCursor(response);
 

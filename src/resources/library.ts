@@ -4,7 +4,7 @@ import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
 import { combine } from "../utils.js";
 import { mapDriveItemResponseToResource } from "./core/utils.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
-import { getDefaultResourceHandlerFor } from "./core/default-resource-handler.js";
+import { getDefaultResourceHandlerMapEntryFor } from "./core/default-resource-handler.js";
 
 export async function publish(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<(Resource | ResourceTemplate)[]> {
 
@@ -52,5 +52,5 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
  * This is a map of [function, handler] tuples. If the function returns true, the handler is used.
  */
 const handlers: ResourceReadHandlerMap = new Map([
-    getDefaultResourceHandlerFor("library"),
+    getDefaultResourceHandlerMapEntryFor("library"),
 ]);
