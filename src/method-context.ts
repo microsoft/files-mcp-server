@@ -1,5 +1,4 @@
 import { getToken } from "./auth.js";
-import { MCPSession } from "./session.js";
 import { GenericPagedResponse } from "./types.js";
 import { combine, decodePathFromBase64, getNextCursor } from "./utils.js";
 
@@ -8,7 +7,6 @@ export interface MCPContext {
     fetchAndAggregate<T = any>(path: string, init?: RequestInit): Promise<T[]>
     graphBaseUrl: string;
     graphVersionPart: string;
-    getSession(): Promise<MCPSession>;
 }
 
 export async function getMethodContext(): Promise<MCPContext> {

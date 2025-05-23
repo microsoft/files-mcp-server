@@ -1,6 +1,7 @@
 import { DynamicToolMode } from "./types.js";
 import { stringIsNullOrEmpty } from "./utils.js";
 
+// amazing session management
 const sessions = new Map<string, MCPSession>();
 
 export interface MCPSession {
