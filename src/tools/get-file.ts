@@ -2,6 +2,7 @@ import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { combine } from "../utils.js";
 import { MCPContext } from "../method-context.js";
+import { parseResponseToResult } from "./core/utils.js";
 
 export const name = "get_file";
 
@@ -78,7 +79,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
             driveItemPath = combine(driveItemPath, "content?format=pdf");
         }
 
-        responses.push(await this.fetchAndParseToResult(driveItemPath, {}));
+        responses.push(await this.fetch(driveItemPath, {}, true).then(parseResponseToResult));
     }
 
     return <ValidCallToolResult>{

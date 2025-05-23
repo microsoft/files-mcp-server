@@ -1,14 +1,11 @@
-import { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 import { getToken } from "./auth.js";
 import { MCPSession } from "./session.js";
-import { GenericPagedResponse, ValidCallToolResult } from "./types.js";
-import { combine, decodePathFromBase64, formatCallToolResult, getNextCursor, parseResponseToResult } from "./utils.js";
+import { GenericPagedResponse } from "./types.js";
+import { combine, decodePathFromBase64, getNextCursor } from "./utils.js";
 
 export interface MCPContext {
-    fetchAndParseToResource(path: string, init?: RequestInit): Promise<ReadResourceResult>;
-    fetchAndParseToResult(path: string, init?: RequestInit): Promise<ValidCallToolResult>;
     fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
-    fetchAndAggregate(path: string, init?: RequestInit): Promise<ValidCallToolResult>
+    fetchAndAggregate<T = any>(path: string, init?: RequestInit): Promise<T[]>
     graphBaseUrl: string;
     graphVersionPart: string;
     getSession(): Promise<MCPSession>;
@@ -20,31 +17,13 @@ export async function getMethodContext(): Promise<MCPContext> {
     return <MCPContext>{
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
-        async fetchAndParseToResult(path: string, init?: RequestInit): Promise<ValidCallToolResult> {
+        async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit): Promise<T[]> {
 
-            const token = await getToken(this);
-
-            const absPath = combine(this.graphBaseUrl, this.graphVersionPart, path);
-
-            console.log(`FETCH PATH: ${absPath}`);
-
-            const response = await fetch(absPath, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
-                ...init,
-            });
-
-            return parseResponseToResult(response);
-        },
-        async fetchAndAggregate(this: MCPContext, path: string, init?: RequestInit): Promise<ValidCallToolResult> {
-
-            const absPath = combine(this.graphBaseUrl, this.graphVersionPart, path);
+            const absPath = /https?:\/\//i.test(path) ? path : combine(this.graphBaseUrl, this.graphVersionPart, path);
 
             const resultAggregate = [];
 
-            let response = await this.fetch<GenericPagedResponse>(absPath);
+            let response = await this.fetch<GenericPagedResponse>(absPath, init);
 
             let [nextCursor] = getNextCursor(response);
 
@@ -57,9 +36,9 @@ export async function getMethodContext(): Promise<MCPContext> {
                 [nextCursor] = getNextCursor(response);
             }
 
-            return formatCallToolResult(resultAggregate, "application/json");
+            return resultAggregate;
         },
-        async fetch<T>(path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
+        async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
 
             const token = await getToken(this);
 

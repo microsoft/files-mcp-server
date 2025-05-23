@@ -2,6 +2,7 @@ import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
 import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { combine, withProgress } from "../utils.js";
+import { formatCallToolResult } from "./core/utils.js";
 
 export const name = "list_lists";
 
@@ -23,5 +24,5 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
             path = "lists";
     }
 
-    return withProgress(params, this.fetchAndAggregate(path));
+    return withProgress(params, this.fetchAndAggregate(path).then(result => formatCallToolResult(result, "application/json")));
 };

@@ -4,13 +4,13 @@ import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
 import { clearResourcesCache } from "../resources.js";
-import { combine, encodePathToBase64 } from "../utils.js";
+import { combine, decodePathFromBase64, encodePathToBase64 } from "../utils.js";
 
 export const name = "set_context";
 
 export const modes: DynamicToolMode[] = [COMMON];
 
-export const description = `This tool allows you to change the context of this mcp server by providing a URL to a resource to use as the contextual entry point.
+export const description = `This tool allows you to change the context of this mcp server by providing a URL (or a valid resource URI obtained from this server) to a resource to use as the contextual entry point.
                             Almost any valid SharePoint or OneDrive url will work, and the tool will return an error if the context cannot be identified.
                             The context can be a site, folder, or file. Changing the context will update the list of available tools and resources. Most
                             entities include a webUrl in the response which you can use with this tool.`;
@@ -36,12 +36,33 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
 
     const { request, session, server } = params;
 
-    const url = <string>request.params.arguments.context_url;
-
-    const shareKey = "u!" + Buffer.from(url, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
+    const contextUrl = <string>request.params.arguments.context_url;
+    const shareKey = "u!" + Buffer.from(contextUrl, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");
 
     // these are roughly in order of our estimation on usage.
     const resolvers: (() => Promise<ResolvedEntityInfo>)[] = [
+        async () => {
+
+            const uri = new URL(contextUrl);
+            const cleanProtocol: DynamicToolMode = <any>uri.protocol.replace(/:$/, "");
+
+            if ((<DynamicToolMode[]>["file", "folder", "site", "list", "library", "listitem"]).indexOf(cleanProtocol) > -1) {
+
+                // this is not a share, this is one of our resource URIs
+
+                const decodedPath = decodePathFromBase64(contextUrl.replace(/^.*?:\/\//, ""));
+
+                const metadata = await this.fetch(decodedPath);
+
+                return {
+                    mode: cleanProtocol,
+                    contextBase: decodedPath,
+                    metadata,
+                };
+            }
+
+            throw Error(`Failed to parse resource id path ${contextUrl}.`);
+        },
         async () => {
 
             // file/folder
@@ -83,7 +104,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
         },
         async () => {
             // tenant root, site path, or site id
-            let parsedURI = URL.parse(url)
+            let parsedURI = URL.parse(contextUrl);
             const result = await this.fetch<{ id: string }>(`/sites/${combine(parsedURI.host, parsedURI.pathname)}`);
             return {
                 mode: "site",
@@ -118,7 +139,7 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
                 content: [
                     <TextContent>{
                         type: "text",
-                        text: `We located the requested context using the path '${url}', it appears to be a ${mode}. We've also include some initial metadata.`,
+                        text: `We located the requested context using the path '${contextUrl}', it appears to be a ${mode}. We've also include some initial metadata.`,
                     },
                     <TextResourceContents>{
                         uri: uriStr,
@@ -128,7 +149,8 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
                     },
                     <TextContent>{
                         type: "text",
-                        text: `The uri '${uriStr}' can be used with resource templates where the uri host represents the key required for the available protocols. Keys only work with the protocol they are delivered with.`,
+                        text: `The uri '${uriStr}' can be used with resource templates where the uri host represents the key required for the available protocols. Keys only work with the protocol they are delivered with, but work for any 
+                               resource template associated with that protocol. This key is not the same as the id value returned in entity metadata and is unique to this server.`,
                     },
                 ],
             };

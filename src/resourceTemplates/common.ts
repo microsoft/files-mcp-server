@@ -28,19 +28,19 @@ export async function publish(this: MCPContext, params: HandlerParams<ListResour
         },
         {
             uriTemplate: "site://{site-key}",
-            name: "Gets a site by its key",
+            name: "Gets a site's metadata by its key",
             description: "Allows you to reference a site entity by key, replacing {site-key} with a valid site key.",
             mimeType: "application/json",
         },
         {
             uriTemplate: "list://{list-key}",
-            name: "Gets a list by its key",
+            name: "Gets a list's metadata by its key",
             description: "Allows you to reference a site entity bykey, replacing {list-key} with a valid site key.",
             mimeType: "application/json",
         },
         {
             uriTemplate: "listitem://{listitem-key}",
-            name: "Gets a list item by its key",
+            name: "Gets a list item's metadata by its key",
             description: "Allows you to reference a site entity bykey, replacing {site-key} with a valid sitekey.",
             mimeType: "application/json",
         },

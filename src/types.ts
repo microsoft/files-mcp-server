@@ -22,7 +22,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 
 export const COMMON = "common";
 
-export type DynamicToolMode = "site" | "library" | "folder" | "list" | "file" | "consumerOD" | typeof COMMON | "not-set"| "hidden";
+export type DynamicToolMode = "site" | "library" | "folder" | "list" | "file" | "listitem" | "consumerOD" | typeof COMMON | "not-set"| "hidden";
 
 export interface DynamicTool extends Tool {
     annotations?: {
