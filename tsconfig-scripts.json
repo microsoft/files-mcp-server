@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "module": "esnext",
+        "declaration": true,
+        "declarationMap": true,
+        "removeComments": false,
+        "lib": [
+            "ES2015",
+            "dom",
+            "ES2017.Object",
+            "ESNext.Iterator"
+        ],
+        "baseUrl": ".",
+        "rootDir": "./scripts",
+        "outDir": "./build-scripts",
+        "allowUnreachableCode": false,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "pretty": true,
+        "noFallthroughCasesInSwitch": true,
+        "sourceMap": true,
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "preserveConstEnums": false,
+        "importHelpers": true
+    },
+    "include": [
+        "./scripts/**/*.ts",
+    ]
+}

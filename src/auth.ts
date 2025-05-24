@@ -3,12 +3,7 @@ import { combine, stringIsNullOrEmpty } from "./utils.js";
 import { RequestHandler } from "express";
 import { MCPContext } from "./method-context.js";
 
-
-export function encodeKey(key: string): string {
-    return Buffer.from(key).toString('base64');
-}
-
-export function decodeKey(key: string): string {
+function decodeKey(key: string): string {
     return Buffer.from(key, 'base64').toString('ascii');
 }
 
