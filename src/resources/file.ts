@@ -27,13 +27,6 @@ export async function publish(this: MCPContext, params: HandlerParams<ReadResour
             // expose metadata resource of file
             resource,
 
-            // expose botspeak representation of file
-            {
-                uri: combine(resource.uri, "botspeak"),
-                name: `Botspeak representation of ${resource.name}`,
-                mimeType: "text/plain",
-            },
-
             // expose direct download
             {
                 uri: combine("/", "file", key, "contentStream"),
@@ -65,25 +58,6 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
  * This is a map of [function, handler] tuples. If the function returns true, the handler is used.
  */
 const handlers: ResourceReadHandlerMap = new Map([
-    [
-        (uri) => /^file:\/\/.*?\/botspeak$/i.test(uri.toString()),
-        async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
-
-            const { request } = params;
-            const encodedPath = /^file:\/\/(.*?)\/botspeak$/.exec(request.params.uri);
-            const path = decodePathFromBase64(encodedPath[1]);
-
-            const botspeakResponse = await this.fetch<Response>(combine(path, "content?format=botspeak"), {}, true);
-
-            const text = await botspeakResponse.text();
-
-            return [{
-                uri: request.params.uri,
-                mimeType: botspeakResponse.headers.get("Content-Type"),
-                text,
-            }];
-        }
-    ],
     [
         (uri) => /^file:\/\/.*?\/content$/i.test(uri.toString()),
         async function (this: MCPContext, uri: URL, params: HandlerParams<ReadResourceRequest>): Promise<Resource[]> {
