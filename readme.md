@@ -6,7 +6,7 @@ It is an http server using delegated authentication to access your environment.
 
 ## Scopes
 
-This sample users the *Files.ReadWrite.All* and *Sites.Read.All* delegated Graph scopes.
+This sample uses the *Files.ReadWrite.All* and *Sites.Read.All* delegated Graph scopes.
 
 ## Install
 
