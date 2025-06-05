@@ -3,6 +3,7 @@ import { DynamicToolMode, ValidCallToolResult } from "../types.js";
 import { combine, decodePathFromBase64 } from "../utils.js";
 import { MCPContext } from "../method-context.js";
 import { parseResponseToResult } from "./core/utils.js";
+import { createDriveItemResourceKey } from "../../resources/core/utils.js";
 
 export const name = "get_file";
 
@@ -50,6 +51,8 @@ export const handler = async function (this: MCPContext<CallToolRequest>): Promi
 
     for (let i = 0; i < operations.length; i++) {
 
+        let augment;
+
         if (/content/i.test(operations[i])) {
 
             driveItemPath = combine(driveItemPath, "contentStream");
@@ -57,6 +60,12 @@ export const handler = async function (this: MCPContext<CallToolRequest>): Promi
         } else if (/pdf/i.test(operations[i])) {
 
             driveItemPath = combine(driveItemPath, "content?format=pdf");
+        } else {
+
+            augment = (i) => {
+                i.file_key = createDriveItemResourceKey(i);
+                return i;
+            }
         }
 
         responses.push(await this.fetch(driveItemPath, {}, true).then(parseResponseToResult));

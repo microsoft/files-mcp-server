@@ -3,7 +3,7 @@ import { GenericPagedResponse, HandlerParams } from "./types.js";
 import { combine, decodePathFromBase64, getNextCursor } from "./utils.js";
 
 export interface MCPContext<RequestParamsType extends Request = Request> {
-    fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
+    fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean, augment?: (vals: T[]) => T[]): Promise<T>;
     fetchAndAggregate<T = any>(path: string, init?: RequestInit, augment?: (vals: T[]) => T[]): Promise<T[]>
     graphBaseUrl: string;
     graphVersionPart: string;
@@ -35,7 +35,7 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             return typeof augment === "function" ? augment(resultAggregate) : resultAggregate;
         },
-        async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
+        async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false, augment?: (vals: T) => T): Promise<T | Response> {
 
             const token = this.params.token!;
 
@@ -60,7 +60,9 @@ export async function getMethodContext(): Promise<MCPContext> {
                 return response;
             }
 
-            return response.json();
+            const json = await response.json();
+
+            return typeof augment === "function" ? augment(json) : json;
         },
         params: {},
     }

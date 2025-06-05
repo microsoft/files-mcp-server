@@ -14,16 +14,16 @@ This sample users the *Files.ReadWrite.All* and *Sites.Read.All* delegated Graph
 2. In your MCP client of choice add this server using `npx -y {ABSOLUTE LOCAL PATH}\files-mcp-server`
 3. Edit the server configuration to include the require env vars
    ```json
-{
-    "mcp": {
-        "servers": {
-            "files-localhost-debug": {
-                "type": "http",
-                "url": "http://localhost:3001/mcp",
+    {
+        "mcp": {
+            "servers": {
+                "files-localhost-debug": {
+                    "type": "http",
+                    "url": "http://localhost:3001/mcp",
+                }
             }
         }
     }
-}
    ```
 4. Begin interacting with the server
 

@@ -36,7 +36,7 @@ export async function parseResponseToResult(response: Response): Promise<ValidCa
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types/Common_types
-export function formatCallToolResult(value: any, mimeType: string = "text/json"): ValidCallToolResult {
+export function formatCallToolResult(value: any, mimeType: string = "text/json", uriStr?: string): ValidCallToolResult {
 
     let resultContent: ValidCallToolContent[] = [];
 
@@ -71,7 +71,6 @@ export function formatCallToolResult(value: any, mimeType: string = "text/json")
 
         resultContent.push(
             <BlobResourceContents>{
-                uri: "test://thing",
                 type: "resource",
                 mimeType,
                 blob: value,
