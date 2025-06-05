@@ -17,7 +17,6 @@ export async function publish(this: MCPContext<ReadResourceRequest>): Promise<(R
     // include metadata
     if (session.mode === "file") {
 
-        //TODO:: eventually we'd cache this
         const metadata = await this.fetch<any>(session.currentContextRoot);
         const resource = mapDriveItemResponseToResource(metadata);
         const key = encodePathToBase64(session.currentContextRoot);

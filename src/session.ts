@@ -33,7 +33,6 @@ export async function ensureSession(sessionId: string): Promise<MCPSession> {
     return sessionCtx;
 }
 
-// TODO: more robust update metchanism
 export async function patchSession(sessionId, session: Partial<Omit<MCPSession, "sessionId">>): Promise<MCPSession> {
 
     if (stringIsNullOrEmpty(sessionId)) {
