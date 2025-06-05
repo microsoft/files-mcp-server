@@ -1,6 +1,7 @@
 import {
     AudioContent,
     BlobResourceContents,
+    CallToolRequest,
     CallToolResult,
     ImageContent,
     Notification,
@@ -29,12 +30,12 @@ export interface DynamicTool extends Tool {
         [key: string]: unknown;
     }
     modes: DynamicToolMode[];
-    handler: (this: MCPContext, params: HandlerParams) => Promise<ValidCallToolResult>;
+    handler: (this: MCPContext<CallToolRequest>) => Promise<ValidCallToolResult>;
 }
 
 export interface DynamicResource {
     publish(this: MCPContext): Promise<Resource[]>;
-    handler(this: MCPContext, params: HandlerParams): Promise<ReadResourceResult>;
+    handler(this: MCPContext<ReadResourceRequest>): Promise<ReadResourceResult>;
 }
 
 export interface DynamicResourceTemplate {
@@ -53,9 +54,9 @@ export type ResourceReadHandlerResult = Resource[] | {
     nextCursor: string;
 };
 
-export type ResourceReadHandlerTest<T extends ReadResourceRequest = ReadResourceRequest> = (uri: URL, params: HandlerParams<T>) => boolean;
+export type ResourceReadHandlerTest<T extends ReadResourceRequest = ReadResourceRequest> = (uri: URL, context: MCPContext<T>) => boolean;
 
-export type ResourceReadHandler<T extends ReadResourceRequest = ReadResourceRequest> = (this: MCPContext, uri: URL, params: HandlerParams<T>) => Promise<ResourceReadHandlerResult>;
+export type ResourceReadHandler<T extends ReadResourceRequest = ReadResourceRequest> = (this: MCPContext<T>, uri: URL) => Promise<ResourceReadHandlerResult>;
 
 export type ResourceReadHandlerMap<T extends ReadResourceRequest = ReadResourceRequest> = Map<ResourceReadHandlerTest<T>, ResourceReadHandler<T>>;
 
@@ -88,6 +89,7 @@ export interface HandlerParams<RequestT extends Request = Request> {
     request: RequestT;
     extra: RequestHandlerExtra<RequestT, Notification>;
     session: MCPSession;
+    token?: string;
 }
 
 export interface GenericPagedResponse {

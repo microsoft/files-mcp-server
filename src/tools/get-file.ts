@@ -1,6 +1,6 @@
 import { CallToolRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
-import { combine } from "../utils.js";
+import { DynamicToolMode, ValidCallToolResult } from "../types.js";
+import { combine, decodePathFromBase64 } from "../utils.js";
 import { MCPContext } from "../method-context.js";
 import { parseResponseToResult } from "./core/utils.js";
 
@@ -18,52 +18,31 @@ export const modes: DynamicToolMode[] = ["file", "folder", "library", "site"];
 export const inputSchema = {
     type: "object",
     properties: {
-        drive_id: {
+        file_key: {
             type: "string",
-            description: "The ID of the drive containing the item whose details we seek. In the context of a drive or folder this is optional.",
-        },
-        item_id: {
-            type: "string",
-            description: "The ID of the drive item whose details we seek",
+            description: "The resource identifier using file:// protocol. You can provide the entire resource uri, or just the key part represented by the uri host value.",
         },
         operations: {
             type: "array",
             items: { type: "string" },
             description: `What information we want about the file, any of 'metadata' (default), 'content', or 'pdf'. You can supply one or more operations.`,
         },
-        address_direct: {
-            type: "boolean",
-            description: "Optional, if set to true and a drive_id and item_id are supplied any context checks will be skipped and the file will be addressed directly."
-        }
     },
-    required: ["drive_id", "item_id"],
+    required: ["file_key"],
 };
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { request, session } = params;
+    const { request } = this.params;
 
     const operations: string[] = <string[]>request.params.arguments.operations || ["metadata"];
 
-    let path: string;
-    const mode = <boolean>request.params.arguments?.address_direct ? "default" : session.mode;
+    // let path: string;
+    let fileKey = <string>request.params.arguments.file_key
 
-    switch (mode) {
-        case "site":
-            path = combine(session.currentContextRoot, "drives", <string>request.params.arguments.drive_id, "items", <string>request.params.arguments.item_id);
-            break;
-        case "consumerOD":
-            path = combine(session.currentContextRoot, "items", <string>request.params.arguments.item_id);
-            break;
-        case "folder":
-            path = combine(session.currentContextRoot, "items", <string>request.params.arguments.item_id);
-            break;
-        case "library":
-            path = combine(session.currentContextRoot, "items", <string>request.params.arguments.item_id);
-            break;
-        default:
-            path = combine(this.graphBaseUrl, this.graphVersionPart, "drives", <string>request.params.arguments.drive_id, "items", <string>request.params.arguments.item_id);
-    }
+    fileKey = fileKey.replace(/^file:\/\//i, "");
+
+    const path = decodePathFromBase64(fileKey);
 
     const responses: ValidCallToolResult[] = [];
 

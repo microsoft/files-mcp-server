@@ -10,9 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p . && shx chmod +x build/*.js",
-    "build-scripts": "tsc -p tsconfig-scripts.json && shx chmod +x build-scripts/*.js",
-    "prepare": "npm run build",
-    "encode-key": "npm run build-scripts && node build-scripts/encode-key.js"
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -32,7 +30,6 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@azure/msal-node": "^3.4.1",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "@pnp/logging": "^4.11.0",
     "express": "^5.1.0"

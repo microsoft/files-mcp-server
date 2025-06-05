@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { DynamicResource, DynamicToolMode, HandlerParams, COMMON } from "./types.js";
+import { DynamicResource, DynamicToolMode, COMMON } from "./types.js";
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
 import { ListResourcesRequest, ListResourcesResult, ReadResourceRequest, Resource } from "@modelcontextprotocol/sdk/types.js";
@@ -42,9 +42,9 @@ export async function getResources(): Promise<Map<string, DynamicResource>> {
     return resources;
 }
 
-export async function getResourcesHandler(this: MCPContext, params: HandlerParams<ListResourcesRequest>): Promise<ListResourcesResult> {
+export async function getResourcesHandler(this: MCPContext<ListResourcesRequest>): Promise<ListResourcesResult> {
 
-    const { session } = params;
+    const { session } = this.params;
 
     const resources = await getResources();
 
@@ -52,7 +52,7 @@ export async function getResourcesHandler(this: MCPContext, params: HandlerParam
 
     for (let [key, resource] of resources) {
         if (key === COMMON || key === session.mode) {
-            activeResources.push(resource.publish.call(this, params));
+            activeResources.push(resource.publish.call(this));
         }
     }
 
@@ -65,11 +65,11 @@ export async function getResourcesHandler(this: MCPContext, params: HandlerParam
     };
 }
 
-export async function readResourceHandler(this: MCPContext, params: HandlerParams<ReadResourceRequest>) {
+export async function readResourceHandler(this: MCPContext<ReadResourceRequest>) {
 
     const resources = await getResources();
 
-    const { request } = params;
+    const { request } = this.params;
 
     const uri = new URL(request.params.uri);
     const mode = <DynamicToolMode>uri.protocol.replace(/:$/, "");
@@ -77,9 +77,9 @@ export async function readResourceHandler(this: MCPContext, params: HandlerParam
     try {
 
         if (resources.has(mode)) {
-            return resources.get(mode).handler.call(this, params);
+            return resources.get(mode).handler.call(this);
         } else {
-            return resources.get(COMMON).handler.call(this, params);
+            return resources.get(COMMON).handler.call(this);
         }
 
     } catch (e) {

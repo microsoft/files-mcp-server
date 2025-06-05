@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { DynamicResourceTemplate, HandlerParams } from "./types.js";
+import { DynamicResourceTemplate } from "./types.js";
 import { resolve, dirname, parse } from "path";
 import { fileURLToPath } from 'url';
 import { ListResourceTemplatesRequest, ListResourceTemplatesResult, ResourceTemplate } from "@modelcontextprotocol/sdk/types.js";
@@ -31,9 +31,9 @@ export async function getResourceTemplates(): Promise<Map<string, DynamicResourc
     return resources;
 }
 
-export async function getResourceTemplatesHandler(this: MCPContext, params: HandlerParams<ListResourceTemplatesRequest>): Promise<ListResourceTemplatesResult> {
+export async function getResourceTemplatesHandler(this: MCPContext<ListResourceTemplatesRequest>): Promise<ListResourceTemplatesResult> {
 
-    const { session } = params;
+    const { session } = this.params;
 
     const resources = await getResourceTemplates();
 
@@ -41,7 +41,7 @@ export async function getResourceTemplatesHandler(this: MCPContext, params: Hand
 
     for (let [key, resource] of resources) {
          if (key === COMMON || key === session.mode) {
-            usedResourcesP.push(resource.publish.call(this, params));
+            usedResourcesP.push(resource.publish.call(this));
         }
     }
 

@@ -13,7 +13,6 @@ import { MCPContext } from "./method-context.js";
 import { getResourcesHandler, readResourceHandler } from "./resources.js";
 import { getResourceTemplatesHandler } from "./resourceTemplates.js";
 import { ensureSession } from "./session.js";
-import { HandlerParams } from "./types.js";
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { getMethodContext } from "./method-context.js";
 
@@ -44,7 +43,7 @@ export async function setupMCPServer(): Promise<Server> {
     );
 
     // this function allows us to normalize the paramters for handlers, injecting anything we need centrally
-    function callHandler<T extends (this: MCPContext, options: HandlerParams) => Promise<any>>(handler: T) {
+    function callHandler<T extends (this: MCPContext) => Promise<any>>(handler: T) {
 
         return async (request: Request, extra: RequestHandlerExtra<Request, Notification>): Promise<ReturnType<T>> => {
 
@@ -52,15 +51,15 @@ export async function setupMCPServer(): Promise<Server> {
             const context = await getMethodContext();
             const session = await ensureSession(extra.sessionId);
 
-            // normalize some params we pass down to all functions/handlers/methods aligned to processing requests
-            const opts: HandlerParams = {
+            context.params = {
                 server,
                 request,
                 extra,
                 session,
-            }
+                token: extra?.authInfo?.token || "",
+            };
 
-            return handler.call(context, opts);
+            return handler.call(context);
         }
     }
 

@@ -1,5 +1,5 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, GenericPagedResponse, HandlerParams, ValidCallToolResult } from "../../types.js";
+import { DynamicToolMode, GenericPagedResponse, ValidCallToolResult } from "../../types.js";
 import { MCPContext } from "../../method-context.js";
 import { getNextCursor } from "../../utils.js";
 
@@ -25,9 +25,9 @@ export const inputSchema = {
     required: [],
 };
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { request } = params;
+    const { request } = this.params;
 
     let urlBase = "/sites/delta";
 

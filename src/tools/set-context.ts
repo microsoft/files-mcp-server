@@ -1,5 +1,5 @@
 import { CallToolRequest, TextContent, TextResourceContents, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { COMMON, DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
+import { COMMON, DynamicToolMode, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
@@ -36,9 +36,9 @@ interface ResolvedEntityInfo {
     metadata: any;
 }
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { request, session, server } = params;
+    const { request, session, server } = this.params;
 
     const contextUrl = <string>request.params.arguments.context_url;
     const shareKey = "u!" + Buffer.from(contextUrl, "utf8").toString("base64").replace(/=$/i, "").replace("/", "_").replace("+", "-");

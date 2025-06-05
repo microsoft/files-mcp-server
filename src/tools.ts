@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import { COMMON, DynamicTool, HandlerParams } from "./types.js";
+import { COMMON, DynamicTool } from "./types.js";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from 'url';
 import { CallToolRequest, ListToolsRequest, ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
@@ -31,16 +31,20 @@ export async function getTools(): Promise<DynamicTool[]> {
         for (let i = 0; i < toolFiles.length; i++) {
 
             const toolFile = toolFiles[i];
-            tools.push(await import("file://" + resolve(dirPath, toolFile)));
+            try {
+                tools.push(await import("file://" + resolve(dirPath, toolFile)));
+            } catch (e) {
+                console.error(e);
+            }
         }
     }
 
     return tools;
 }
 
-export async function getToolsHandler(this: MCPContext, params: HandlerParams<ListToolsRequest>): Promise<ListToolsResult> {
+export async function getToolsHandler(this: MCPContext<ListToolsRequest>): Promise<ListToolsResult> {
 
-    const { session } = params;
+    const { session } = this.params;
 
     const tools = await getTools();
 
@@ -58,9 +62,9 @@ export async function getToolsHandler(this: MCPContext, params: HandlerParams<Li
     };
 }
 
-export async function callToolHandler(this: MCPContext, params: HandlerParams<CallToolRequest>) {
+export async function callToolHandler(this: MCPContext<CallToolRequest>) {
 
-    const { request } = params;
+    const { request } = this.params;
 
     const tools = await getTools();
 
@@ -71,7 +75,7 @@ export async function callToolHandler(this: MCPContext, params: HandlerParams<Ca
             throw Error(`Could not locate tool "${request.params.name}".`);
         }
 
-        return tool[0].handler.call(this, params);
+        return tool[0].handler.call(this);
 
     } catch (e) {
 

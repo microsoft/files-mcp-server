@@ -1,5 +1,5 @@
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../../types.js";
+import { DynamicToolMode, ValidCallToolResult } from "../../types.js";
 import { MCPContext } from "../../method-context.js";
 
 export const name = "test_long_running";
@@ -8,9 +8,9 @@ export const modes: DynamicToolMode[] = ["hidden"];
 
 export const description = "A test tool for checking a long running operation";
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { request, server } = params;
+    const { request, server } = this.params;
 
     const progressToken = request.params._meta?.progressToken;
     const steps = 5;

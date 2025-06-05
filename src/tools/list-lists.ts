@@ -1,5 +1,5 @@
 import { CallToolRequest, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { combine, withProgress } from "../utils.js";
 import { formatCallToolResult } from "./core/utils.js";
@@ -15,9 +15,9 @@ export const modes: DynamicToolMode[] = ["site"];
 
 export const description = "Lists the SharePoint Lists in the current site.";
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { session } = params;
+    const { session } = this.params;
 
     let path: string;
 
@@ -29,5 +29,5 @@ export const handler = async function (this: MCPContext, params: HandlerParams<C
             path = "lists";
     }
 
-    return withProgress(params, this.fetchAndAggregate(path).then(result => formatCallToolResult(result, "application/json")));
+    return withProgress.call(this, this.fetchAndAggregate(path).then(result => formatCallToolResult(result, "application/json")));
 };

@@ -1,12 +1,13 @@
-import { getToken } from "./auth.js";
-import { GenericPagedResponse } from "./types.js";
+import { Request } from "@modelcontextprotocol/sdk/types.js";
+import { GenericPagedResponse, HandlerParams } from "./types.js";
 import { combine, decodePathFromBase64, getNextCursor } from "./utils.js";
 
-export interface MCPContext {
+export interface MCPContext<RequestParamsType extends Request = Request> {
     fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean): Promise<T>;
-    fetchAndAggregate<T = any>(path: string, init?: RequestInit): Promise<T[]>
+    fetchAndAggregate<T = any>(path: string, init?: RequestInit, augment?: (vals: T[]) => T[]): Promise<T[]>
     graphBaseUrl: string;
     graphVersionPart: string;
+    params: HandlerParams<RequestParamsType>,
 }
 
 export async function getMethodContext(): Promise<MCPContext> {
@@ -15,7 +16,7 @@ export async function getMethodContext(): Promise<MCPContext> {
     return <MCPContext>{
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
-        async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit): Promise<T[]> {
+        async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit, augment?: (vals: T[]) => T[]): Promise<T[]> {
 
             const resultAggregate = [];
 
@@ -32,11 +33,11 @@ export async function getMethodContext(): Promise<MCPContext> {
                 [nextCursor] = getNextCursor(response);
             }
 
-            return resultAggregate;
+            return typeof augment === "function" ? augment(resultAggregate) : resultAggregate;
         },
         async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false): Promise<T | Response> {
 
-            const token = await getToken(this);
+            const token = this.params.token!;
 
             const absPath = /https?:\/\//i.test(path) ? path : combine(this.graphBaseUrl, this.graphVersionPart, path);
 
@@ -61,5 +62,6 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             return response.json();
         },
+        params: {},
     }
 }

@@ -1,5 +1,5 @@
 import { CallToolRequest, TextContent, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 import { patchSession } from "../session.js";
 import { clearToolsCache } from "../tools.js";
@@ -15,9 +15,9 @@ export const modes: DynamicToolMode[] = ["consumerOD", "library", "file", "folde
 
 export const description = `This tool clears the current context of the server. It can be used to reset to the root`;
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { session, server } = params;
+    const { session, server } = this.params;
 
     await patchSession(session.sessionId, {
         mode: "not-set",

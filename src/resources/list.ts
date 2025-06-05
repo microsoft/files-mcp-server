@@ -1,6 +1,6 @@
 import { ReadResourceRequest, ReadResourceResult, Resource, ResourceTemplate } from "@modelcontextprotocol/sdk/types";
 import { MCPContext } from "../method-context.js";
-import { HandlerParams, ResourceReadHandlerMap } from "../types.js";
+import { ResourceReadHandlerMap } from "../types.js";
 import { getDefaultResourceHandlerMapEntryFor } from "./core/default-resource-handler.js";
 import { processResourceHandlers } from "./core/process-resource-handlers.js";
 
@@ -9,9 +9,9 @@ export async function publish(this: MCPContext): Promise<(Resource | ResourceTem
     return [];
 }
 
-export async function handler(this: MCPContext, params: HandlerParams<ReadResourceRequest>): Promise<ReadResourceResult> {
+export async function handler(this: MCPContext<ReadResourceRequest>): Promise<ReadResourceResult> {
 
-    const { request } = params;
+    const { request } = this.params;
 
     const uri = new URL(request.params.uri);
 
@@ -21,7 +21,7 @@ export async function handler(this: MCPContext, params: HandlerParams<ReadResour
         return;
     }
 
-    return processResourceHandlers.call(this, uri, params, handlers);
+    return processResourceHandlers.call(this, uri, handlers);
 }
 
 

@@ -2,8 +2,7 @@ import { Application } from "express";
 import { combine, decodePathFromBase64, stringIsNullOrEmpty } from "../utils.js";
 import { IncomingMessage } from "http";
 import https from "https";
-import { getToken } from "../auth.js";
-import { getMethodContext } from "../method-context.js";
+// import { getMethodContext } from "../method-context.js";
 
 export function registerFileStreamRoutes(app: Application) {
 
@@ -22,8 +21,10 @@ export function registerFileStreamRoutes(app: Application) {
         }
 
         // get our normal context and token
-        const context = await getMethodContext();
-        const token = await getToken(context);
+        // const context = await getMethodContext();
+        // const token = await getToken(context);
+
+        const token = "fake";
 
         // decode the path should be a valid driveItem path
         const decodedPath = decodePathFromBase64(path);

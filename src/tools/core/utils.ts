@@ -71,6 +71,7 @@ export function formatCallToolResult(value: any, mimeType: string = "text/json")
 
         resultContent.push(
             <BlobResourceContents>{
+                uri: "test://thing",
                 type: "resource",
                 mimeType,
                 blob: value,

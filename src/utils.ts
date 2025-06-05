@@ -1,4 +1,5 @@
-import { GenericPagedResponse, HandlerParams } from "./types.js";
+import { MCPContext } from "./method-context.js";
+import { GenericPagedResponse } from "./types.js";
 
 /**
  * Combines an arbitrary set of paths ensuring and normalizes the slashes
@@ -76,9 +77,9 @@ export interface WithProgressOptions {
     timeout: number;
 }
 
-export async function withProgress<T>(params: HandlerParams, promise: Promise<T>, options?: WithProgressOptions) {
+export async function withProgress<T>(this: MCPContext, promise: Promise<T>, options?: WithProgressOptions) {
 
-    const { server, request } = params;
+    const { server, request } = this.params;
     const progressToken = request.params._meta?.progressToken;
     let steps = 0;
     let clear;

@@ -1,5 +1,5 @@
 import { CallToolRequest, TextContent, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { DynamicToolMode, HandlerParams, ValidCallToolResult } from "../types.js";
+import { DynamicToolMode, ValidCallToolResult } from "../types.js";
 import { MCPContext } from "../method-context.js";
 
 export const name = "get_context";
@@ -14,9 +14,9 @@ export const modes: DynamicToolMode[] = ["consumerOD", "library", "file", "folde
 export const description = `This tool gets the current context of the server. It will also supply additional contextual information.
                             The setting can be managed using the set_context tool.`;
 
-export const handler = async function (this: MCPContext, params: HandlerParams<CallToolRequest>): Promise<ValidCallToolResult> {
+export const handler = async function (this: MCPContext<CallToolRequest>): Promise<ValidCallToolResult> {
 
-    const { session } = params;
+    const { session } = this.params;
 
     return <ValidCallToolResult>{
         role: "user",
