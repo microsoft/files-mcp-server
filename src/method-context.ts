@@ -3,8 +3,8 @@ import { GenericPagedResponse, HandlerParams } from "./types.js";
 import { combine, decodePathFromBase64, getNextCursor } from "./utils.js";
 
 export interface MCPContext<RequestParamsType extends Request = Request> {
-    fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean, augment?: (vals: T[]) => T[]): Promise<T>;
-    fetchAndAggregate<T = any>(path: string, init?: RequestInit, augment?: (vals: T[]) => T[]): Promise<T[]>
+    fetch<T>(path: string, init?: RequestInit, returnResponse?: boolean, pipe?: (vals: T) => T): Promise<T>;
+    fetchAndAggregate<T = any>(path: string, init?: RequestInit, pipe?: (vals: T[]) => T[]): Promise<T[]>
     graphBaseUrl: string;
     graphVersionPart: string;
     params: HandlerParams<RequestParamsType>,
@@ -16,7 +16,7 @@ export async function getMethodContext(): Promise<MCPContext> {
     return <MCPContext>{
         graphBaseUrl: "https://graph.microsoft.com",
         graphVersionPart: "v1.0",
-        async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit, augment?: (vals: T[]) => T[]): Promise<T[]> {
+        async fetchAndAggregate<T = any>(this: MCPContext, path: string, init?: RequestInit, pipe?: (vals: T[]) => T[]): Promise<T[]> {
 
             const resultAggregate = [];
 
@@ -33,9 +33,9 @@ export async function getMethodContext(): Promise<MCPContext> {
                 [nextCursor] = getNextCursor(response);
             }
 
-            return typeof augment === "function" ? augment(resultAggregate) : resultAggregate;
+            return typeof pipe === "function" ? pipe(resultAggregate) : resultAggregate;
         },
-        async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false, augment?: (vals: T) => T): Promise<T | Response> {
+        async fetch<T>(this: MCPContext, path: string, init?: RequestInit, returnResponse = false, pipe?: (vals: T) => T): Promise<T | Response> {
 
             const token = this.params.token!;
 
@@ -62,7 +62,7 @@ export async function getMethodContext(): Promise<MCPContext> {
 
             const json = await response.json();
 
-            return typeof augment === "function" ? augment(json) : json;
+            return typeof pipe === "function" ? pipe(json) : json;
         },
         params: {},
     }
